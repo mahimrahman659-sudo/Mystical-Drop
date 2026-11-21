@@ -92,6 +92,9 @@ Admin routes:
 - `/admin/products/[slug]/edit`
 - `/admin/orders`
 - `/admin/orders/[id]`
+- `/admin/settings`
+
+Admins can upload product images and the homepage banner from the panel. Uploaded images are validated, re-encoded to WebP, stored in MongoDB, and served from cacheable media URLs.
 
 Admin pages and mutations require a server-verified admin role. To promote an existing, email-verified customer:
 
@@ -105,7 +108,7 @@ The command is safe to rerun. There is no default admin account or public role-p
 
 `npm run setup:db` creates the required indexes and upserts the three original catalog products using stable seed IDs and slugs. Re-running it preserves admin edits, archived products, and existing orders.
 
-The setup covers unique indexes for user email, provider accounts, session tokens, product slugs, order references, checkout submission keys, and rate-limit keys.
+The setup covers unique indexes for user email, provider accounts, session tokens, product slugs, order references, checkout submission keys, rate-limit keys, and site settings, plus indexes for uploaded media.
 
 ## Tests
 

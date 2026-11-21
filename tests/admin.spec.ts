@@ -285,6 +285,67 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
   await expect(page.getByText("No matching orders")).toBeVisible();
 });
 
+test("admin can upload a product image and homepage banner", async ({
+  page,
+  request,
+}) => {
+  test.slow();
+  await loginAsAdmin(page, request);
+  const imagePath = "public/images/terracotta-detail.jpg";
+
+  await page.goto("/admin/products/rustic-tree-stone-well/edit");
+  await page
+    .getByLabel("Upload Main image", { exact: true })
+    .setInputFiles(imagePath);
+  const productImage = page.locator('input[type="hidden"][name="imageSrc"]');
+  await expect(productImage).toHaveValue(
+    /^\/api\/media\/[a-f0-9]{24}$/,
+    { timeout: 30_000 },
+  );
+  const productImageSrc = await productImage.inputValue();
+  await page.getByRole("button", { name: "Save product" }).click();
+  await page.waitForURL(/\/admin\/products\?saved=updated/, {
+    timeout: 30_000,
+  });
+
+  const db = await getTestDb();
+  const product = await db
+    .collection("products")
+    .findOne({ slug: "rustic-tree-stone-well" });
+  expect(product?.image?.src).toBe(productImageSrc);
+  const imageResponse = await request.get(productImageSrc);
+  expect(imageResponse.status()).toBe(200);
+  expect(imageResponse.headers()["content-type"]).toBe("image/webp");
+
+  await page.goto("/admin/settings");
+  await expect(
+    page.getByRole("heading", { name: "Site banner" }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Upload Banner image", { exact: true })
+    .setInputFiles(imagePath);
+  const bannerImage = page.locator('input[type="hidden"][name="imageSrc"]');
+  await expect(bannerImage).toHaveValue(/^\/api\/media\/[a-f0-9]{24}$/, {
+    timeout: 30_000,
+  });
+  const bannerImageSrc = await bannerImage.inputValue();
+  await page
+    .getByLabel(/Banner image description/)
+    .fill("Uploaded verification banner");
+  await page.getByRole("button", { name: "Save banner" }).click();
+  await expect(page.getByText("Homepage banner updated.")).toBeVisible();
+
+  const settings = await db
+    .collection("siteSettings")
+    .findOne({ key: "homeBanner" });
+  expect(settings?.imageSrc).toBe(bannerImageSrc);
+  expect(settings?.imageAlt).toBe("Uploaded verification banner");
+
+  const home = await request.get("/");
+  expect(home.status()).toBe(200);
+  expect(await home.text()).toContain("Uploaded verification banner");
+});
+
 test("admin screens fit phone, tablet, and desktop widths", async ({
   page,
   request,
@@ -312,6 +373,7 @@ test("admin screens fit phone, tablet, and desktop widths", async ({
     { path: "/admin/products/rustic-tree-stone-well/edit", heading: /Edit product/ },
     { path: "/admin/orders", heading: /Orders/ },
     { path: `/admin/orders/${order.id}`, heading: new RegExp(`#${order.reference}`) },
+    { path: "/admin/settings", heading: /Site banner/ },
   ];
 
   for (const width of widths) {

@@ -46,6 +46,8 @@ async function main() {
     PLAYWRIGHT_BASE_URL: BASE_URL,
     PORT: String(TEST_PORT),
     DEV_MAILBOX_ENABLED: "1",
+    GOOGLE_CLIENT_ID: "",
+    GOOGLE_CLIENT_SECRET: "",
     SMTP_HOST: "127.0.0.1",
     SMTP_PORT: String(smtp.port),
     SMTP_SECURE: "false",

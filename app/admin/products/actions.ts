@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdminAction } from "@/lib/admin/auth";
 import type { ProductFormState } from "@/lib/admin/product-form";
-import { isAllowedImageAsset } from "@/lib/admin/images";
+import { isAllowedImageSource } from "@/lib/admin/images";
 import { getDb } from "@/lib/db/client";
 import {
   createProduct,
@@ -89,12 +89,12 @@ async function parseProductForm(formData: FormData): Promise<
   ].filter((value): value is string => Boolean(value));
 
   for (const source of imageFields) {
-    if (!(await isAllowedImageAsset(source))) {
+    if (!(await isAllowedImageSource(source))) {
       return {
         ok: false,
         state: {
-          error: "Choose image files from the TerraNova asset library.",
-          fieldErrors: { imageSrc: "Use an existing TerraNova image asset." },
+          error: "Choose or upload a supported image.",
+          fieldErrors: { imageSrc: "Choose or upload a supported image." },
           values,
         },
       };

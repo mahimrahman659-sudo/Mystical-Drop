@@ -4,6 +4,7 @@ import { useActionState, useId } from "react";
 import type { ImageAsset } from "@/lib/admin/images";
 import type { ProductFormState } from "@/lib/admin/product-form";
 import { FormMessage } from "@/components/auth/AuthFields";
+import { ImageField } from "@/components/admin/ImageField";
 
 type ProductFormValues = {
   name: string;
@@ -80,58 +81,6 @@ function Field({
       ) : hint ? (
         <p id={`${id}-hint`} className="mt-1 text-label-sm text-on-surface-variant">
           {hint}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function ImageSelect({
-  name,
-  label,
-  defaultValue,
-  images,
-  error,
-  optional = false,
-}: {
-  name: string;
-  label: string;
-  defaultValue?: string;
-  images: ImageAsset[];
-  error?: string;
-  optional?: boolean;
-}) {
-  const id = useId();
-  return (
-    <div>
-      <label className="field-label" htmlFor={id}>
-        {label}{" "}
-        {optional ? (
-          <span className="font-normal normal-case tracking-normal text-on-surface-variant">
-            (Optional)
-          </span>
-        ) : (
-          <span className="text-primary">*</span>
-        )}
-      </label>
-      <select
-        id={id}
-        name={name}
-        defaultValue={defaultValue ?? ""}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        className="field-input"
-      >
-        {optional ? <option value="">No image</option> : null}
-        {images.map((image) => (
-          <option key={image.value} value={image.value}>
-            {image.label}
-          </option>
-        ))}
-      </select>
-      {error ? (
-        <p id={`${id}-error`} className="field-error">
-          {error}
         </p>
       ) : null}
     </div>
@@ -279,18 +228,18 @@ export function ProductForm({
           Images
         </h2>
         <p className="mt-1 text-body-sm text-on-surface-variant">
-          Choose from the local TerraNova asset library. The first image is the
-          main storefront image.
+          Choose an existing TerraNova asset or upload a new image. The main
+          image is shown on storefront product cards.
         </p>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ImageSelect
+          <ImageField
             name="imageSrc"
             label="Main image"
             defaultValue={v("imageSrc", initial.imageSrc)}
             images={images}
             error={errors.imageSrc}
           />
-          <ImageSelect
+          <ImageField
             name="gallery1"
             label="Gallery image 1"
             defaultValue={v("gallery1", initial.gallery1)}
@@ -298,7 +247,7 @@ export function ProductForm({
             error={errors.gallery1}
             optional
           />
-          <ImageSelect
+          <ImageField
             name="gallery2"
             label="Gallery image 2"
             defaultValue={v("gallery2", initial.gallery2)}
@@ -306,7 +255,7 @@ export function ProductForm({
             error={errors.gallery2}
             optional
           />
-          <ImageSelect
+          <ImageField
             name="gallery3"
             label="Gallery image 3"
             defaultValue={v("gallery3", initial.gallery3)}

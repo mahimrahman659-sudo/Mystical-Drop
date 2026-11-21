@@ -7,6 +7,8 @@ import type { StoredProduct } from "../catalog";
 export const PRODUCT_COLLECTION = "products";
 export const ORDER_COLLECTION = "orders";
 export const DEV_MAILBOX_COLLECTION = "devMailbox";
+export const MEDIA_COLLECTION = "media";
+export const SITE_SETTINGS_COLLECTION = "siteSettings";
 
 export async function ensureDatabaseIndexes(): Promise<void> {
   const db = getDb();
@@ -71,6 +73,14 @@ export async function ensureDatabaseIndexes(): Promise<void> {
     db.collection(DEV_MAILBOX_COLLECTION).createIndex(
       { expireAt: 1 },
       { expireAfterSeconds: 0, name: "devMailbox_expireAt_ttl" },
+    ),
+    db.collection(MEDIA_COLLECTION).createIndex(
+      { createdAt: -1 },
+      { name: "media_createdAt_idx" },
+    ),
+    db.collection(SITE_SETTINGS_COLLECTION).createIndex(
+      { key: 1 },
+      { unique: true, name: "siteSettings_key_uidx" },
     ),
   ]);
 }

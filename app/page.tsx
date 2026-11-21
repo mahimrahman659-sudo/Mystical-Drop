@@ -9,9 +9,13 @@ import {
   WavesIcon,
 } from "@/components/ui/icons";
 import { getActiveProducts } from "@/lib/db/products";
+import { getSiteBanner } from "@/lib/db/site-settings";
 
 export default async function HomePage() {
-  const products = await getActiveProducts();
+  const [products, banner] = await Promise.all([
+    getActiveProducts(),
+    getSiteBanner(),
+  ]);
 
   return (
     <>
@@ -71,8 +75,8 @@ export default async function HomePage() {
           <div className="mt-space-md lg:col-span-6 lg:mt-0">
             <div className="group relative h-[360px] overflow-hidden rounded-xl bg-surface-container-low shadow-soft sm:h-[460px] lg:h-[560px]">
               <Image
-                src="/images/triptych-study.jpg"
-                alt="The three TerraNova handcrafted fountains arranged on a warm wooden study desk with plants, notebooks, and a reading lamp"
+                src={banner.imageSrc}
+                alt={banner.imageAlt}
                 fill
                 priority
                 sizes="(min-width: 1024px) 50vw, 100vw"

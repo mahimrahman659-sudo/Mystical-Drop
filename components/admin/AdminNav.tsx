@@ -7,6 +7,7 @@ const links = [
   { href: "/admin", label: "Overview", exact: true },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/settings", label: "Site banner" },
 ];
 
 export function AdminNav() {
@@ -15,7 +16,7 @@ export function AdminNav() {
   return (
     <nav aria-label="Admin navigation" className="w-full">
       <div className="flex flex-col gap-2 lg:block">
-        <div className="grid grid-cols-3 gap-1 lg:flex lg:flex-col lg:gap-0.5">
+        <div className="grid grid-cols-2 gap-1 sm:grid-cols-4 lg:flex lg:flex-col lg:gap-0.5">
           {links.map((link) => {
             const active = link.exact
               ? pathname === link.href
