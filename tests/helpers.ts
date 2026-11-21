@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { expect, type APIRequestContext, type BrowserContext, type Page } from "@playwright/test";
 import { MongoClient, type Db } from "mongodb";
@@ -49,14 +50,31 @@ export type TestMail = {
   createdAt: Date;
 };
 
+export function capturedMails(): TestMail[] {
+  const captureFile = process.env.E2E_SMTP_CAPTURE_FILE;
+  if (!captureFile) throw new Error("E2E SMTP capture file is not configured.");
+  return readFileSync(captureFile, "utf8")
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      const mail = JSON.parse(line) as Omit<TestMail, "createdAt"> & {
+        createdAt: string;
+      };
+      return { ...mail, createdAt: new Date(mail.createdAt) };
+    });
+}
+
 export async function latestMail(
   to: string,
   kind: "verification" | "password-reset",
 ): Promise<TestMail> {
-  const db = await getTestDb();
-  const mail = await db
-    .collection<TestMail>("devMailbox")
-    .findOne({ to: to.toLowerCase(), kind }, { sort: { createdAt: -1 } });
+  const mail = capturedMails()
+    .filter(
+      (entry) =>
+        entry.kind === kind &&
+        entry.to.toLowerCase().includes(to.toLowerCase()),
+    )
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
   if (!mail) throw new Error(`No ${kind} email found for ${to}.`);
   return mail;
 }

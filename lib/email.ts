@@ -2,6 +2,7 @@ import "server-only";
 
 import nodemailer from "nodemailer";
 import { getDb } from "@/lib/db/client";
+import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 const FROM = process.env.SMTP_FROM?.trim() || "TerraNova <no-reply@example.com>";
 
@@ -13,6 +14,11 @@ type AuthEmail = {
   text: string;
   html: string;
   kind: AuthEmailKind;
+};
+
+export type AuthEmailDeliveryStatus = {
+  available: boolean;
+  mode: "smtp" | "development-mailbox" | "unavailable";
 };
 
 export async function sendVerificationEmail(to: string, url: string): Promise<void> {
@@ -50,47 +56,71 @@ export async function sendPasswordResetEmail(to: string, url: string): Promise<v
   });
 }
 
+export async function getAuthEmailDeliveryStatus(): Promise<AuthEmailDeliveryStatus> {
+  if (smtpConfigured()) {
+    const transporter = createSmtpTransport();
+    try {
+      await transporter.verify();
+      return { available: true, mode: "smtp" };
+    } catch {
+      return { available: false, mode: "unavailable" };
+    } finally {
+      transporter.close();
+    }
+  }
+
+  if (isDevelopmentMailboxEnabled()) {
+    return { available: true, mode: "development-mailbox" };
+  }
+
+  return { available: false, mode: "unavailable" };
+}
+
 async function sendAuthEmail(email: AuthEmail): Promise<void> {
-  const host = process.env.SMTP_HOST?.trim();
+  if (smtpConfigured()) {
+    const transporter = createSmtpTransport();
+    try {
+      await transporter.sendMail({
+        from: FROM,
+        to: email.to,
+        subject: email.subject,
+        text: email.text,
+        html: email.html,
+      });
+    } finally {
+      transporter.close();
+    }
+    return;
+  }
 
-  if (host) {
-    const transporter = nodemailer.createTransport({
-      host,
-      port: Number(process.env.SMTP_PORT || 587),
-      secure: process.env.SMTP_SECURE === "true",
-      auth: process.env.SMTP_USER
-        ? {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS || "",
-          }
-        : undefined,
-    });
-
-    await transporter.sendMail({
-      from: FROM,
-      to: email.to,
-      subject: email.subject,
-      text: email.text,
-      html: email.html,
+  if (isDevelopmentMailboxEnabled()) {
+    const now = new Date();
+    await getDb().collection("devMailbox").insertOne({
+      ...email,
+      createdAt: now,
+      expireAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
     });
     return;
   }
 
-  const developmentMailbox =
-    process.env.NODE_ENV !== "production" ||
-    process.env.DEV_MAILBOX_ENABLED === "1";
+  throw new Error("Email delivery is currently unavailable.");
+}
 
-  if (!developmentMailbox) {
-    throw new Error(
-      "SMTP is not configured. Configure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, and SMTP_FROM to send account emails.",
-    );
-  }
+function smtpConfigured(): boolean {
+  return Boolean(process.env.SMTP_HOST?.trim());
+}
 
-  const now = new Date();
-  await getDb().collection("devMailbox").insertOne({
-    ...email,
-    createdAt: now,
-    expireAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+function createSmtpTransport() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST!.trim(),
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: process.env.SMTP_USER
+      ? {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS || "",
+        }
+      : undefined,
   });
 }
 

@@ -18,6 +18,10 @@ import {
   GoogleAuthButton,
   SubmitButton,
 } from "@/components/auth/AuthFields";
+import {
+  checkAuthEmailDelivery,
+  useAuthEmailDelivery,
+} from "@/lib/use-auth-email-delivery";
 
 type LoginFormProps = {
   returnTo: string;
@@ -49,6 +53,7 @@ export function LoginForm({
   const [googlePending, setGooglePending] = useState(false);
   const [resendNote, setResendNote] = useState<string | null>(null);
   const pendingRef = useRef(false);
+  const emailDelivery = useAuthEmailDelivery();
 
   function validate(): boolean {
     const next: { email?: string; password?: string } = {};
@@ -127,6 +132,12 @@ export function LoginForm({
     setResending(true);
     setResendNote(null);
     try {
+      if (!(await checkAuthEmailDelivery())) {
+        setResendNote(
+          "Account emails are temporarily unavailable. Please try again shortly.",
+        );
+        return;
+      }
       const { error } = await authClient.sendVerificationEmail({
         email: unverifiedEmail,
         callbackURL: verificationCallback(returnTo),
@@ -156,6 +167,12 @@ export function LoginForm({
         </FormMessage>
       ) : null}
       {googleError ? <FormMessage>{googleError}</FormMessage> : null}
+      {emailDelivery === "unavailable" ? (
+        <FormMessage>
+          Account emails are temporarily unavailable. Resend requests will not
+          work until delivery is restored.
+        </FormMessage>
+      ) : null}
       {formError ? <FormMessage>{formError}</FormMessage> : null}
       {resendNote ? <FormMessage tone="info">{resendNote}</FormMessage> : null}
 

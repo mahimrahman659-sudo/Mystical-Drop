@@ -17,6 +17,10 @@ import {
   SubmitButton,
 } from "@/components/auth/AuthFields";
 import { verificationCallback } from "@/components/auth/LoginForm";
+import {
+  checkAuthEmailDelivery,
+  useAuthEmailDelivery,
+} from "@/lib/use-auth-email-delivery";
 
 type RegisterFormProps = {
   returnTo: string;
@@ -40,7 +44,9 @@ export function RegisterForm({ returnTo, googleEnabled }: RegisterFormProps) {
   const [resending, setResending] = useState(false);
   const [googlePending, setGooglePending] = useState(false);
   const [resendNote, setResendNote] = useState<string | null>(null);
+  const [deliveryFailed, setDeliveryFailed] = useState(false);
   const pendingRef = useRef(false);
+  const emailDelivery = useAuthEmailDelivery();
 
   function validate(): boolean {
     const next: typeof fieldErrors = {};
@@ -67,6 +73,15 @@ export function RegisterForm({ returnTo, googleEnabled }: RegisterFormProps) {
     pendingRef.current = true;
     setPending(true);
     try {
+      if (!(await checkAuthEmailDelivery())) {
+        setFormError(
+          "Account emails are temporarily unavailable. Your account was not created. Please try again shortly.",
+        );
+        pendingRef.current = false;
+        setPending(false);
+        return;
+      }
+
       const { error } = await authClient.signUp.email({
         name: name.trim(),
         email: email.trim(),
@@ -82,6 +97,7 @@ export function RegisterForm({ returnTo, googleEnabled }: RegisterFormProps) {
       }
 
       setSuccessEmail(email.trim());
+      setDeliveryFailed(!(await checkAuthEmailDelivery()));
       setPending(false);
       pendingRef.current = false;
     } catch {
@@ -124,6 +140,12 @@ export function RegisterForm({ returnTo, googleEnabled }: RegisterFormProps) {
     setResending(true);
     setResendNote(null);
     try {
+      if (!(await checkAuthEmailDelivery())) {
+        setResendNote(
+          "Account emails are still unavailable. Please try again shortly.",
+        );
+        return;
+      }
       const { error } = await authClient.sendVerificationEmail({
         email: successEmail,
         callbackURL: verificationCallback(returnTo),
@@ -143,11 +165,19 @@ export function RegisterForm({ returnTo, googleEnabled }: RegisterFormProps) {
   if (successEmail) {
     return (
       <div className="space-y-4">
-        <FormMessage tone="success">
-          Check your inbox. We sent a verification link to{" "}
-          <strong className="break-all">{successEmail}</strong>. Verify the
-          address, then sign in.
-        </FormMessage>
+        {deliveryFailed ? (
+          <FormMessage>
+            Your account was created, but the verification email could not be
+            sent. Account email delivery is temporarily unavailable. Use the
+            button below to try again shortly.
+          </FormMessage>
+        ) : (
+          <FormMessage tone="success">
+            Check your inbox. We sent a verification link to{" "}
+            <strong className="break-all">{successEmail}</strong>. Verify the
+            address, then sign in.
+          </FormMessage>
+        )}
         <p className="text-body-sm leading-relaxed text-on-surface-variant">
           The link expires in one hour. If it does not arrive, check your spam
           folder or request another email.
@@ -177,6 +207,11 @@ export function RegisterForm({ returnTo, googleEnabled }: RegisterFormProps) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      {emailDelivery === "unavailable" ? (
+        <FormMessage>
+          Account emails are temporarily unavailable. Please try again shortly.
+        </FormMessage>
+      ) : null}
       {formError ? <FormMessage>{formError}</FormMessage> : null}
 
       <GoogleAuthButton enabled={googleEnabled} pending={googlePending} onClick={handleGoogle} />

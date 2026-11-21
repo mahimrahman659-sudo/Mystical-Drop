@@ -9,6 +9,10 @@ import {
   FormMessage,
   SubmitButton,
 } from "@/components/auth/AuthFields";
+import {
+  checkAuthEmailDelivery,
+  useAuthEmailDelivery,
+} from "@/lib/use-auth-email-delivery";
 
 export function VerifyEmailForm({
   initialEmail,
@@ -22,6 +26,7 @@ export function VerifyEmailForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const emailDelivery = useAuthEmailDelivery();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,6 +40,12 @@ export function VerifyEmailForm({
     setFieldError(undefined);
     setPending(true);
     try {
+      if (!(await checkAuthEmailDelivery())) {
+        setFormError(
+          "Account emails are temporarily unavailable. Please try again shortly.",
+        );
+        return;
+      }
       const { error } = await authClient.sendVerificationEmail({
         email: email.trim(),
         callbackURL: `/login?verified=1&returnTo=${encodeURIComponent(returnTo)}`,
@@ -57,6 +68,11 @@ export function VerifyEmailForm({
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      {emailDelivery === "unavailable" ? (
+        <FormMessage>
+          Account emails are temporarily unavailable. Please try again shortly.
+        </FormMessage>
+      ) : null}
       {formError ? <FormMessage>{formError}</FormMessage> : null}
       {note ? <FormMessage tone="success">{note}</FormMessage> : null}
       <AuthField

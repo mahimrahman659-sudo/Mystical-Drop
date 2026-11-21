@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
+import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 export const metadata: Metadata = {
   title: "Forgot password",
@@ -25,10 +26,7 @@ export default async function ForgotPasswordPage({ searchParams }: ForgotPagePro
       eyebrow="Account recovery"
       title="Reset your password."
       description="Enter your account email and we will request a single-use link. The response is the same whether or not an account exists."
-      showDevMailbox={
-        process.env.NODE_ENV !== "production" ||
-        process.env.DEV_MAILBOX_ENABLED === "1"
-      }
+      showDevMailbox={isDevelopmentMailboxEnabled()}
     >
       <ForgotPasswordForm returnTo={returnTo} />
     </AuthShell>

@@ -70,7 +70,7 @@ In local development without SMTP, verification and password-reset emails are ca
 /dev/mailbox
 ```
 
-The development mailbox is unavailable in production unless `DEV_MAILBOX_ENABLED=1` is explicitly set for a local production-mode test. Do not enable it in production.
+The development mailbox exists only outside production. A production build never exposes it and never stores account email content in MongoDB, even if `DEV_MAILBOX_ENABLED=1` is present. Production without working SMTP reports email delivery as unavailable and keeps the resend/retry paths available. Do not place links, tokens, or email bodies in logs.
 
 ## Customer Accounts And Orders
 
@@ -113,9 +113,9 @@ The setup covers unique indexes for user email, provider accounts, session token
 npm run test:e2e
 ```
 
-This command builds the production app, starts an isolated MongoDB instance through `mongodb-memory-server`, and runs Playwright tests. It does not connect to Atlas or production data.
+This command builds the production app, starts an isolated MongoDB instance through `mongodb-memory-server`, runs a local SMTP capture server, and runs Playwright tests. It does not connect to Atlas or production data. Account emails are captured in memory/temporary files rather than the development mailbox.
 
-The suite covers account verification and login, password reset, guest and authenticated checkout, cart preservation, duplicate-order prevention, customer order isolation, admin boundaries, catalog editing and archiving, fulfilment transitions, responsive layouts, and hydration checks.
+The suite covers account verification and login, password reset, production mailbox isolation, missing-SMTP behavior, guest and authenticated checkout, cart preservation, duplicate-order prevention, customer order isolation, admin boundaries, catalog editing and archiving, fulfilment transitions, responsive layouts, and hydration checks.
 
 ## Production Build
 

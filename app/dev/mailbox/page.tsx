@@ -3,6 +3,7 @@ import { Fragment, type ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db/client";
 import { formatOrderDate } from "@/lib/orders";
+import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 export const dynamic = "force-dynamic";
 
@@ -19,13 +20,6 @@ type DevMail = {
   kind: string;
   createdAt: Date;
 };
-
-function mailboxEnabled(): boolean {
-  return (
-    process.env.NODE_ENV !== "production" ||
-    process.env.DEV_MAILBOX_ENABLED === "1"
-  );
-}
 
 function linkify(text: string): ReactNode[] {
   const parts = text.split(/(https?:\/\/[^\s]+)/g);
@@ -45,7 +39,7 @@ function linkify(text: string): ReactNode[] {
 }
 
 export default async function DevMailboxPage() {
-  if (!mailboxEnabled()) notFound();
+  if (!isDevelopmentMailboxEnabled()) notFound();
 
   const mails = await getDb()
     .collection<DevMail>("devMailbox")

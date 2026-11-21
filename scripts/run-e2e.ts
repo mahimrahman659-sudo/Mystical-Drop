@@ -1,7 +1,9 @@
 import { spawn } from "node:child_process";
+import os from "node:os";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { MongoMemoryServer } from "mongodb-memory-server";
+import { startTestSmtp } from "./test-smtp";
 
 const TEST_PORT = Number(process.env.E2E_PORT || 3100);
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -29,6 +31,11 @@ async function main() {
   const mongo = await MongoMemoryServer.create({
     instance: { launchTimeout: 60_000 },
   });
+  const captureFile = path.join(
+    os.tmpdir(),
+    `terranova-smtp-${Date.now()}-${randomBytes(4).toString("hex")}.jsonl`,
+  );
+  const smtp = await startTestSmtp(captureFile);
 
   const env: NodeJS.ProcessEnv = {
     ...process.env,
@@ -39,13 +46,15 @@ async function main() {
     PLAYWRIGHT_BASE_URL: BASE_URL,
     PORT: String(TEST_PORT),
     DEV_MAILBOX_ENABLED: "1",
+    SMTP_HOST: "127.0.0.1",
+    SMTP_PORT: String(smtp.port),
+    SMTP_SECURE: "false",
+    SMTP_FROM: "TerraNova <no-reply@example.com>",
+    E2E_SMTP_CAPTURE_FILE: captureFile,
     NEXT_TELEMETRY_DISABLED: "1",
   };
-  delete env.SMTP_HOST;
-  delete env.SMTP_PORT;
   delete env.SMTP_USER;
   delete env.SMTP_PASS;
-  delete env.SMTP_FROM;
 
   Object.assign(process.env, env);
 
@@ -79,6 +88,7 @@ async function main() {
     );
     process.exitCode = testExit;
   } finally {
+    await smtp.close();
     await mongo.stop();
   }
 }

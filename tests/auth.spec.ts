@@ -10,6 +10,7 @@ import {
   promoteAdmin,
   registerViaUi,
   registerVerifyAndLogin,
+  resetLink,
   resetTestDatabase,
   submitDemoOrder,
   verificationLink,
@@ -74,11 +75,11 @@ test("registration, verification, login, logout, duplicate, and role boundary", 
     page.getByText(/If the account still needs verification/),
   ).toBeVisible();
 
-  await page.goto("/dev/mailbox");
-  await expect(
-    page.getByRole("heading", { name: "Verify your TerraNova account" }).first(),
-  ).toBeVisible();
-  await page.locator('a[href*="/api/auth/verify-email"]').first().click();
+  const verificationMail = await waitForMail(
+    "customer.one@example.com",
+    "verification",
+  );
+  await page.goto(verificationLink(verificationMail));
   await expect(page).toHaveURL(/\/login\?verified=1/);
   await waitForAppReady(page);
   await expect(page.getByText("Email verified. Sign in to continue.")).toBeVisible();
@@ -137,6 +138,30 @@ test("registration, verification, login, logout, duplicate, and role boundary", 
   expect(injectedUser?.role).toBe("customer");
 });
 
+test("production ignores DEV_MAILBOX_ENABLED and delivers through SMTP without storing mailbox content", async ({
+  page,
+}) => {
+  const mailboxResponse = await page.goto("/dev/mailbox");
+  expect(mailboxResponse?.status()).toBe(404);
+
+  const deliveryResponse = await page.request.get("/api/auth-delivery");
+  expect(deliveryResponse.ok()).toBe(true);
+  await expect(deliveryResponse.json()).resolves.toMatchObject({
+    available: true,
+    mode: "smtp",
+  });
+
+  await registerViaUi(page, {
+    name: "SMTP Delivery",
+    email: "smtp.delivery@example.com",
+    password: "SmtpDeliveryPass123",
+  });
+  await waitForMail("smtp.delivery@example.com", "verification");
+
+  const db = await getTestDb();
+  expect(await db.collection("devMailbox").countDocuments()).toBe(0);
+});
+
 test("password reset is generic, single-use, and revokes the old password", async ({
   page,
   request,
@@ -164,8 +189,7 @@ test("password reset is generic, single-use, and revokes the old password", asyn
   ).toBeVisible();
 
   const mail = await waitForMail("reset.customer@example.com", "password-reset");
-  await page.goto("/dev/mailbox");
-  await page.locator('a[href*="/api/auth/reset-password/"]').first().click();
+  await page.goto(resetLink(mail));
   await expect(page).toHaveURL(/\/reset-password\?token=/);
   await waitForAppReady(page);
   await page.getByLabel(/^New password/).fill("NewPass12345");

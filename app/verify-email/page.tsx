@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { VerifyEmailForm } from "@/components/auth/VerifyEmailForm";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
+import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 export const metadata: Metadata = {
   title: "Verify email",
@@ -27,10 +28,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyPageProps)
       eyebrow="Email verification"
       title="Verify your email."
       description="Enter the address you registered with to request a fresh verification link. Links expire after one hour."
-      showDevMailbox={
-        process.env.NODE_ENV !== "production" ||
-        process.env.DEV_MAILBOX_ENABLED === "1"
-      }
+      showDevMailbox={isDevelopmentMailboxEnabled()}
     >
       <VerifyEmailForm initialEmail={email} returnTo={returnTo} />
     </AuthShell>

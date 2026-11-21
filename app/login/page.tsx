@@ -5,6 +5,7 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { getSessionUser } from "@/lib/auth/session";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
 import { googleIsConfigured } from "@/lib/auth/server";
+import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -30,10 +31,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       eyebrow="Customer account"
       title="Welcome back."
       description="Sign in to keep your order history together. Your cart and favorites stay on this device."
-      showDevMailbox={
-        process.env.NODE_ENV !== "production" ||
-        process.env.DEV_MAILBOX_ENABLED === "1"
-      }
+      showDevMailbox={isDevelopmentMailboxEnabled()}
       belowCard={
         <p className="text-center text-body-sm text-on-surface-variant">
           Prefer to browse without an account?{" "}

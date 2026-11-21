@@ -5,6 +5,7 @@ import { RegisterForm } from "@/components/auth/RegisterForm";
 import { getSessionUser } from "@/lib/auth/session";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
 import { googleIsConfigured } from "@/lib/auth/server";
+import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 export const metadata: Metadata = {
   title: "Create account",
@@ -30,10 +31,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
       eyebrow="Customer account"
       title="Create your account."
       description="A quiet place for your fountain orders, delivery details, and care notes. Email verification keeps your account secure."
-      showDevMailbox={
-        process.env.NODE_ENV !== "production" ||
-        process.env.DEV_MAILBOX_ENABLED === "1"
-      }
+      showDevMailbox={isDevelopmentMailboxEnabled()}
     >
       <RegisterForm
         returnTo={returnTo}

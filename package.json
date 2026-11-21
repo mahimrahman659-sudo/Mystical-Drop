@@ -30,14 +30,22 @@
     "@types/nodemailer": "^8.0.2",
     "@types/react": "19.1.6",
     "@types/react-dom": "19.1.5",
+    "@types/smtp-server": "^3.5.13",
     "autoprefixer": "^10.7.0",
     "dotenv": "^17.2.3",
     "eslint": "8.57.1",
     "eslint-config-next": "15.5.29",
+    "mailparser": "^3.15.0",
     "mongodb-memory-server": "^11.3.0",
     "postcss": "^8.5.33",
+    "smtp-server": "^3.21.7",
     "tailwindcss": "3.4.17",
     "tsx": "^4.20.6",
     "typescript": "5.8.3"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.33"
+    }
   }
 }

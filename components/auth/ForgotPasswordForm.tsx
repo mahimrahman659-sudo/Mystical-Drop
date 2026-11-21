@@ -9,6 +9,10 @@ import {
   FormMessage,
   SubmitButton,
 } from "@/components/auth/AuthFields";
+import {
+  checkAuthEmailDelivery,
+  useAuthEmailDelivery,
+} from "@/lib/use-auth-email-delivery";
 
 export function ForgotPasswordForm({ returnTo }: { returnTo: string }) {
   const [email, setEmail] = useState("");
@@ -17,6 +21,7 @@ export function ForgotPasswordForm({ returnTo }: { returnTo: string }) {
   const [submitted, setSubmitted] = useState(false);
   const [pending, setPending] = useState(false);
   const pendingRef = useRef(false);
+  const emailDelivery = useAuthEmailDelivery();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,6 +36,14 @@ export function ForgotPasswordForm({ returnTo }: { returnTo: string }) {
     pendingRef.current = true;
     setPending(true);
     try {
+      if (!(await checkAuthEmailDelivery())) {
+        setFormError(
+          "Account emails are temporarily unavailable. Please try again shortly.",
+        );
+        pendingRef.current = false;
+        setPending(false);
+        return;
+      }
       const { error } = await authClient.requestPasswordReset({
         email: email.trim(),
         redirectTo: "/reset-password",
@@ -77,6 +90,11 @@ export function ForgotPasswordForm({ returnTo }: { returnTo: string }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      {emailDelivery === "unavailable" ? (
+        <FormMessage>
+          Account emails are temporarily unavailable. Please try again shortly.
+        </FormMessage>
+      ) : null}
       {formError ? <FormMessage>{formError}</FormMessage> : null}
       <AuthField
         id="forgot-email"
