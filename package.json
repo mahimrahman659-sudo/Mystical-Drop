@@ -1,0 +1,43 @@
+{
+  "name": "terranova-storefront",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "tsx scripts/run-e2e.ts",
+    "setup:db": "tsx scripts/setup-db.ts",
+    "admin:promote": "tsx scripts/promote-admin.ts"
+  },
+  "dependencies": {
+    "@better-auth/mongo-adapter": "^1.7.27",
+    "better-auth": "^1.7.27",
+    "mongodb": "^7.9.1",
+    "next": "15.5.29",
+    "nodemailer": "^10.6.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "server-only": "^0.0.1",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "22.15.30",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "19.1.6",
+    "@types/react-dom": "19.1.5",
+    "autoprefixer": "^10.7.0",
+    "dotenv": "^17.2.3",
+    "eslint": "8.57.1",
+    "eslint-config-next": "15.5.29",
+    "mongodb-memory-server": "^11.3.0",
+    "postcss": "^8.5.33",
+    "tailwindcss": "3.4.17",
+    "tsx": "^4.20.6",
+    "typescript": "5.8.3"
+  }
+}

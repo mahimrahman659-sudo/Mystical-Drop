@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TerraNova">
+  <rect width="64" height="64" rx="14" fill="#f8fbf1"/>
+  <path d="M12 44c7-1 9-6 13-11 4-5 8-10 17-13-2 9-5 15-10 20-5 5-11 6-20 4Z" fill="#52634c"/>
+  <path d="M18 50c5-8 12-14 22-18" fill="none" stroke="#8c4a2a" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="45" cy="18" r="4" fill="#8c4a2a"/>
+</svg>
