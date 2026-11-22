@@ -35,7 +35,7 @@ export async function SiteFooter() {
                 Dhaka Studio
               </p>
               <p className="mt-1 text-body-sm text-on-surface">
-                House 24, Road 11, Banani, Dhaka 1213
+                7/8-A Free School Street, Hatirpool, Dhaka-1205
               </p>
             </div>
           </div>
@@ -89,11 +89,8 @@ export async function SiteFooter() {
                 to be confirmed
               </p>
               <p className="text-on-surface">
-                <span className="text-on-surface-variant">Concierge:</span> +880
-                1711 000000
-              </p>
-              <p className="text-label-sm text-on-surface-variant">
-                Placeholder contact details from the demo design.
+                <span className="text-on-surface-variant">Contact:</span>{" "}
+                01646886795
               </p>
             </div>
           </div>

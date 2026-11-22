@@ -44,12 +44,6 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-outline-variant/20 bg-surface/90 shadow-[0_1px_8px_rgba(41,45,39,0.04)] backdrop-blur-xl">
-      <div className="flex items-center justify-center bg-surface-container-low px-margin-mobile py-1.5 lg:px-margin">
-        <p className="text-center text-label-sm uppercase leading-4 tracking-[0.14em] text-on-surface-variant sm:tracking-widest">
-          Free artisanal delivery nationwide across Bangladesh
-          <span className="hidden sm:inline"> • Gentle trickle acoustic calibration</span>
-        </p>
-      </div>
       <div className="site-container flex h-[68px] items-center justify-between gap-3 sm:h-20">
         <Link
           href="/"
