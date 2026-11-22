@@ -14,8 +14,11 @@ export const metadata: Metadata = {
     template: `%s • ${BRAND_NAME}`,
   },
   description:
-    "Handcrafted indoor water fountains from Bengal, designed for meditative calm, acoustic stillness, and mindful spaces.",
+    "Handcrafted tabletop water fountains from Bengal, designed for meditative calm, acoustic stillness, and mindful spaces.",
   applicationName: BRAND_NAME,
+  verification: {
+    google: "SrK0VfQ50nOdwRILvb6jaRvHWW6Edd2Ekq84ZdR94S0",
+  },
   keywords: [
     BRAND_NAME,
     "handcrafted fountains",
@@ -26,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: `${BRAND_NAME} — ${BRAND_TAGLINE}`,
     description:
-      "Handcrafted indoor fountains, shaped in small batches for quiet, restorative spaces.",
+      "Handcrafted tabletop fountains, shaped in small batches for quiet, restorative spaces.",
     type: "website",
     siteName: BRAND_NAME,
   },
