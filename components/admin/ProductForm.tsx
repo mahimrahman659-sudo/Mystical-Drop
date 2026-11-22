@@ -5,6 +5,7 @@ import type { ImageAsset } from "@/lib/admin/images";
 import type { ProductFormState } from "@/lib/admin/product-form";
 import { FormMessage } from "@/components/auth/AuthFields";
 import { ImageField } from "@/components/admin/ImageField";
+import { BRAND_NAME } from "@/lib/brand";
 
 type ProductFormValues = {
   name: string;
@@ -228,7 +229,7 @@ export function ProductForm({
           Images
         </h2>
         <p className="mt-1 text-body-sm text-on-surface-variant">
-          Choose an existing TerraNova asset or upload a new image. The main
+          Choose an existing {BRAND_NAME} asset or upload a new image. The main
           image is shown on storefront product cards.
         </p>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">

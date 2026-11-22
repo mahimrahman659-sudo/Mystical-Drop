@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   addFromHomepage,
   createGuestOrderViaApi,
+  getTestDb,
   resetTestDatabase,
   seedCart,
   seedConfirmationHandle,
@@ -40,8 +41,14 @@ async function expectNoOverflow(page: Page) {
 
 test("storefront search, favorites, gallery, and mobile menu", async ({ page }) => {
   await page.goto("/");
+  await expect(page).toHaveTitle("Mystical Drop — Artisanal Water Features");
   await expect(
-    page.getByRole("heading", { name: "Our Three Handcrafted Fountains" }),
+    page
+      .locator("header")
+      .getByRole("link", { name: "Mystical Drop — return to homepage" }),
+  ).toBeVisible();
+  await expect(
+    page.locator("#collection").getByRole("heading", { name: "Our Fountains" }),
   ).toBeVisible();
   await expect(page.locator("main article")).toHaveCount(3);
 
@@ -56,6 +63,9 @@ test("storefront search, favorites, gallery, and mobile menu", async ({ page }) 
     .getByRole("link", { name: /Rustic Tree & Stone Well Fountain/ })
     .click();
   await expect(page).toHaveURL(/\/products\/rustic-tree-stone-well$/);
+  await expect(page).toHaveTitle(
+    "Rustic Tree & Stone Well Fountain • Mystical Drop",
+  );
 
   await page.getByRole("button", { name: /Save Rustic Tree & Stone Well Fountain/ }).click();
   await page.getByRole("button", { name: "Favorites, 1 saved" }).click();
@@ -74,10 +84,16 @@ test("storefront search, favorites, gallery, and mobile menu", async ({ page }) 
   await expect(page.getByText("Showing Angle 02: Top Wellhead Cavity")).toBeAttached();
 
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page
+      .locator("header")
+      .getByRole("link", { name: "Mystical Drop — return to homepage" }),
+  ).toBeVisible();
+  await expectNoOverflow(page);
   const menuButton = page.getByRole("button", { name: "Open menu" });
   await menuButton.click();
   const menu = page.getByRole("dialog", { name: "Site menu" });
-  await expect(menu.getByRole("link", { name: "The 3 Fountains" })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Our Fountains" })).toBeVisible();
   await expect(menu.getByRole("link", { name: "Sign in" })).toBeVisible();
   await expect(menu.getByRole("link", { name: "Create account" })).toBeVisible();
   await page.keyboard.press("Escape");
@@ -91,7 +107,7 @@ test("empty cart is rendered from live catalog availability", async ({ page }) =
     page.getByRole("heading", { name: "Your Cart is Currently Empty" }),
   ).toBeVisible();
   await expect(page.getByText("(0 items)")).toBeVisible();
-  await expect(page.locator("footer")).toContainText("TerraNova");
+  await expect(page.locator("footer")).toContainText("Mystical Drop");
 
   await page.goto("/checkout");
   await expect(page.getByRole("heading", { name: "Your cart is empty" })).toBeVisible();
@@ -102,6 +118,68 @@ test("empty cart is rendered from live catalog availability", async ({ page }) =
   await expect(
     page.getByRole("heading", { name: "This path has run dry." }),
   ).toBeVisible();
+});
+
+test("catalog wording stays accurate for zero, three, and four active products", async ({
+  page,
+  request,
+}) => {
+  test.slow();
+  const db = await getTestDb();
+  const products = db.collection("products");
+
+  await page.goto("/");
+  await expect(
+    page
+      .locator("#collection")
+      .getByRole("heading", { name: "Our Fountains", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator("header")
+      .getByRole("link", { name: "Our Fountains", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("main article")).toHaveCount(3);
+  await expect(page.locator("#about").getByText("3", { exact: true })).toBeVisible();
+
+  const bamboo = await products.findOne({ slug: "bamboo-cascade" });
+  if (!bamboo) throw new Error("Seed product missing.");
+  const { _id, seedId, ...copy } = bamboo;
+  await products.insertOne({
+    ...copy,
+    slug: "fourth-fixture",
+    name: "Fourth Fixture Fountain",
+    shortName: "Fourth Fixture",
+    catalogNumber: "04",
+    status: "active",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(page.locator("main article")).toHaveCount(4);
+  await expect(page.locator("#about").getByText("4", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Our Three Handcrafted Fountains" }),
+  ).toHaveCount(0);
+  const fourProductCatalog = await request.get("/api/catalog");
+  const fourProducts = (await fourProductCatalog.json()) as {
+    products: unknown[];
+  };
+  expect(fourProducts.products).toHaveLength(4);
+
+  await products.updateMany({}, { $set: { status: "archived" } });
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(
+    page.getByRole("heading", { name: "The collection is being prepared" }),
+  ).toBeVisible();
+  await expect(page.locator("main article")).toHaveCount(0);
+  await expect(page.locator("footer")).toContainText(
+    "No fountains are currently listed.",
+  );
+  const emptyCatalog = await request.get("/api/catalog");
+  const emptyProducts = (await emptyCatalog.json()) as { products: unknown[] };
+  expect(emptyProducts.products).toHaveLength(0);
 });
 
 test("storefront pages fit every viewport with real images and confirmed order", async ({
@@ -145,7 +223,7 @@ test("storefront pages fit every viewport with real images and confirmed order",
     const page = await context.newPage();
 
     const routes = [
-      { path: "/", heading: /Our Three Handcrafted Fountains/ },
+      { path: "/", heading: /Our Fountains/ },
       { path: "/products/rustic-tree-stone-well", heading: /Rustic Tree & Stone Well Fountain/ },
       { path: "/cart", heading: /Your Peaceful Cart/ },
       { path: "/checkout", heading: /Checkout/ },
@@ -157,7 +235,7 @@ test("storefront pages fit every viewport with real images and confirmed order",
       await expect(page.getByRole("heading", { name: route.heading }).first()).toBeVisible();
       await waitForImages(page);
       await page.locator("footer").scrollIntoViewIfNeeded();
-      await expect(page.locator("footer")).toContainText("TerraNova");
+      await expect(page.locator("footer")).toContainText("Mystical Drop");
       await expectNoOverflow(page);
     }
 

@@ -5,7 +5,7 @@ import { sanitizeReturnTo } from "@/lib/auth/return-to";
 
 export const metadata: Metadata = {
   title: "Reset password",
-  description: "Choose a new password for your TerraNova account.",
+  description: "Choose a new password for your Mystical Drop account.",
   robots: { index: false, follow: false },
 };
 

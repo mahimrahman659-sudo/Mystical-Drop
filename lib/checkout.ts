@@ -12,6 +12,11 @@ export const DISTRICT_SUGGESTIONS = [
 ] as const;
 
 export const CONFIRMATION_STORAGE_KEY = "terranova-order-confirmation-v1";
+export const CHECKOUT_ATTEMPT_STORAGE_KEY = "terranova-checkout-attempts-v1";
+
+const CHECKOUT_KEY_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const MAX_STORED_CHECKOUT_ATTEMPTS = 8;
 
 export type CheckoutValues = {
   fullName: string;
@@ -98,4 +103,72 @@ export function formatDeliveryAddress(customer: OrderCustomer): string[] {
     ? `${customer.city} - ${customer.postalCode}`
     : customer.city;
   return [customer.street, cityLine].filter(Boolean);
+}
+
+export function checkoutCartSignature(
+  lines: Array<{ slug: string; quantity: number }>,
+): string {
+  return lines
+    .map((line) => `${line.slug}:${line.quantity}`)
+    .sort()
+    .join("|");
+}
+
+export function ensureCheckoutSubmissionKey(cartSignature: string): string {
+  if (typeof window === "undefined") return crypto.randomUUID();
+
+  const attempts = readCheckoutAttempts();
+  const existing = attempts[cartSignature];
+  if (existing && CHECKOUT_KEY_PATTERN.test(existing)) return existing;
+
+  const submissionKey = crypto.randomUUID();
+  const entries = Object.entries(attempts)
+    .filter(([, key]) => CHECKOUT_KEY_PATTERN.test(key))
+    .slice(-(MAX_STORED_CHECKOUT_ATTEMPTS - 1));
+  attempts[cartSignature] = submissionKey;
+  const trimmed = Object.fromEntries([
+    ...entries,
+    [cartSignature, submissionKey],
+  ]);
+  persistCheckoutAttempts(trimmed);
+  return submissionKey;
+}
+
+export function clearCheckoutAttempt(cartSignature: string): void {
+  if (typeof window === "undefined") return;
+  const attempts = readCheckoutAttempts();
+  if (!(cartSignature in attempts)) return;
+  delete attempts[cartSignature];
+  persistCheckoutAttempts(attempts);
+}
+
+function readCheckoutAttempts(): Record<string, string> {
+  try {
+    const raw = window.localStorage.getItem(CHECKOUT_ATTEMPT_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+    const attempts: Record<string, string> = {};
+    for (const [signature, key] of Object.entries(parsed)) {
+      if (typeof key === "string" && CHECKOUT_KEY_PATTERN.test(key)) {
+        attempts[signature] = key;
+      }
+    }
+    return attempts;
+  } catch {
+    return {};
+  }
+}
+
+function persistCheckoutAttempts(attempts: Record<string, string>): void {
+  try {
+    window.localStorage.setItem(
+      CHECKOUT_ATTEMPT_STORAGE_KEY,
+      JSON.stringify(attempts),
+    );
+  } catch {
+    return;
+  }
 }

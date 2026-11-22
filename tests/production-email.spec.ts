@@ -73,7 +73,7 @@ async function startApp(
 ): Promise<ProductionApp> {
   const port = await freePort();
   const baseUrl = `http://127.0.0.1:${port}`;
-  const dbName = `terranova_e2e_no_smtp_${Date.now()}_${port}`;
+  const dbName = `mystical_drop_e2e_no_smtp_${Date.now()}_${port}`;
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     NODE_ENV: "production",
@@ -95,7 +95,7 @@ async function startApp(
     env.SMTP_HOST = "127.0.0.1";
     env.SMTP_PORT = String(await freePort());
     env.SMTP_SECURE = "false";
-    env.SMTP_FROM = "TerraNova <no-reply@example.com>";
+    env.SMTP_FROM = "Mystical Drop <no-reply@example.com>";
   }
 
   const server = spawn(

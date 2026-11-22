@@ -4,11 +4,12 @@ import { redirect } from "next/navigation";
 import { AdminAccessDenied } from "@/components/admin/AdminAccessDenied";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { getAdminViewer } from "@/lib/admin/auth";
+import { BRAND_NAME } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: {
     default: "Admin",
-    template: "%s • TerraNova Admin",
+    template: `%s • ${BRAND_NAME} Admin`,
   },
   robots: { index: false, follow: false },
 };
@@ -28,7 +29,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <aside>
           <div className="sticky top-28">
             <div className="mb-3 rounded-lg bg-surface-container-low p-3">
-              <p className="eyebrow text-primary">TerraNova</p>
+              <p className="eyebrow text-primary">{BRAND_NAME}</p>
               <p className="mt-1 font-display text-headline-sm text-on-surface">
                 Admin panel
               </p>

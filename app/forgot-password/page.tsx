@@ -6,7 +6,8 @@ import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 export const metadata: Metadata = {
   title: "Forgot password",
-  description: "Request a single-use TerraNova password reset link.",
+  description: "Request a single-use Mystical Drop password reset link.",
+  robots: { index: false, follow: false },
 };
 
 type ForgotPageProps = {

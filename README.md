@@ -1,6 +1,6 @@
-# TerraNova
+# Mystical Drop
 
-TerraNova is a handcrafted indoor water fountain storefront for Dhaka, Bangladesh. The app includes the storefront, customer accounts, authenticated checkout, customer order history, and a responsive admin panel.
+Mystical Drop is a handcrafted indoor water fountain storefront for Dhaka, Bangladesh. The app includes the storefront, customer accounts, guest and authenticated checkout, customer order history, and a responsive admin panel.
 
 ## Stack
 
@@ -25,6 +25,8 @@ MONGODB_DB_NAME
 BETTER_AUTH_SECRET
 BETTER_AUTH_URL
 ```
+
+Existing deployments must keep their current `MONGODB_DB_NAME`; changing it points the app at a different, empty database.
 
 Run the idempotent index/catalog setup:
 
@@ -58,7 +60,13 @@ For Google OAuth, create a Google Cloud OAuth web client and add this authorized
 http://localhost:3000/api/auth/callback/google
 ```
 
-Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env.local`, then restart the app. Google sign-in and explicit account linking use Better Auth's OAuth and `linkSocial` flows. Implicit linking by matching email is intentionally disabled.
+For production, add the deployed origin and its callback URL instead:
+
+```text
+https://your-production-domain.example/api/auth/callback/google
+```
+
+Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env.local`, then restart the app. In deployment, add the same values to the hosting environment and set `BETTER_AUTH_URL` to the deployed origin. Google sign-in and explicit account linking use Better Auth's OAuth and `linkSocial` flows. Implicit linking by matching email is intentionally disabled.
 
 ## Email
 
@@ -78,7 +86,7 @@ The development mailbox exists only outside production. A production build never
 - `/account/orders/[id]` only returns orders owned by the signed-in customer.
 - Guest checkout remains available.
 - Orders are stored in MongoDB with server-calculated prices, totals, and purchase-time item snapshots.
-- A unique checkout submission key prevents duplicate orders.
+- A unique checkout submission key prevents duplicate orders and is retained across retries and reloads until the attempt is completed or the cart changes.
 - Confirmation details for guests are scoped by a high-entropy access token stored in the browser tab; order references alone do not expose delivery details.
 - Checkout is a clearly labeled demonstration Cash on Delivery flow. No card details or real payments are collected.
 
@@ -118,7 +126,7 @@ npm run test:e2e
 
 This command builds the production app, starts an isolated MongoDB instance through `mongodb-memory-server`, runs a local SMTP capture server, and runs Playwright tests. It does not connect to Atlas or production data. Account emails are captured in memory/temporary files rather than the development mailbox.
 
-The suite covers account verification and login, password reset, production mailbox isolation, missing-SMTP behavior, guest and authenticated checkout, cart preservation, duplicate-order prevention, customer order isolation, admin boundaries, catalog editing and archiving, fulfilment transitions, responsive layouts, and hydration checks.
+The suite covers account verification and login, password reset, production mailbox isolation, missing-SMTP behavior, guest and authenticated checkout, price and availability changes, cart preservation, interrupted-response idempotency, duplicate-order prevention, customer order isolation, admin boundaries, catalog editing and archiving, setup/index integrity, fulfilment transitions, responsive layouts, and hydration checks.
 
 ## Production Build
 
@@ -127,4 +135,4 @@ npm run build
 npm start
 ```
 
-Before accepting real orders, configure Atlas, production auth URLs and secrets, Google OAuth, SMTP, real support/policy content, and a live payment and fulfilment integration. The current storefront is a demo COD implementation.
+Before accepting real orders, configure Atlas, production auth URLs and secrets, Google OAuth, SMTP, real support/policy content, and a live payment and fulfilment integration. Use a dedicated production database rather than a development database. The current storefront is a demo COD implementation.

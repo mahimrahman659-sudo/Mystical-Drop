@@ -6,7 +6,7 @@ import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 export const metadata: Metadata = {
   title: "Verify email",
-  description: "Resend the TerraNova account verification email.",
+  description: "Resend the Mystical Drop account verification email.",
   robots: { index: false, follow: false },
 };
 

@@ -46,11 +46,13 @@ type CartContextValue = {
   isHydrated: boolean;
   catalogError: string | null;
   toast: CartToastState | null;
+  unavailableLines: CartLine[];
   dismissToast: () => void;
   addItem: (slug: string, quantity?: number, options?: AddOptions) => void;
   changeQuantity: (slug: string, delta: number) => void;
   updateQuantity: (slug: string, quantity: number) => void;
   removeItem: (slug: string) => void;
+  removeUnavailable: () => void;
   clearCart: () => void;
 };
 
@@ -168,6 +170,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines([]);
   }, []);
 
+  const removeUnavailable = useCallback(() => {
+    setLines((previous) => {
+      const next = previous.filter((line) => bySlug.has(line.slug));
+      persistCart(next);
+      return next;
+    });
+  }, [bySlug]);
+
+  const unavailableLines = useMemo(
+    () =>
+      catalogLoaded ? lines.filter((line) => !bySlug.has(line.slug)) : [],
+    [catalogLoaded, lines, bySlug],
+  );
+
   const visibleLines = useMemo(
     () => (catalogLoaded ? filterAvailableLines(lines, products) : []),
     [catalogLoaded, lines, products],
@@ -189,11 +205,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       isHydrated,
       catalogError,
       toast,
+      unavailableLines,
       dismissToast,
       addItem,
       changeQuantity,
       updateQuantity,
       removeItem,
+      removeUnavailable,
       clearCart,
     }),
     [
@@ -202,11 +220,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       isHydrated,
       catalogError,
       toast,
+      unavailableLines,
       dismissToast,
       addItem,
       changeQuantity,
       updateQuantity,
       removeItem,
+      removeUnavailable,
       clearCart,
     ],
   );

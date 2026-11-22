@@ -23,7 +23,8 @@ import { formatPrice } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Your account",
-  description: "Your TerraNova profile and order history.",
+  description: "Your Mystical Drop profile and order history.",
+  robots: { index: false, follow: false },
 };
 
 type AccountPageProps = {
@@ -89,9 +90,13 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             <dl className="mt-5 space-y-3 border-t border-outline-variant/25 pt-4 text-body-sm">
               <div className="flex items-center justify-between gap-3">
                 <dt className="text-on-surface-variant">Email status</dt>
-                <dd className="flex items-center gap-1.5 font-medium text-secondary">
-                  <CheckCircleIcon size={15} />
-                  Verified
+                <dd
+                  className={`flex items-center gap-1.5 font-medium ${
+                    user.emailVerified ? "text-secondary" : "text-error"
+                  }`}
+                >
+                  {user.emailVerified ? <CheckCircleIcon size={15} /> : null}
+                  {user.emailVerified ? "Verified" : "Verification pending"}
                 </dd>
               </div>
               <div className="flex items-center justify-between gap-3">
@@ -123,7 +128,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               </h2>
             </div>
             <p className="mt-2 text-body-sm leading-relaxed text-on-surface-variant">
-              Your password is stored using Better Auth&apos;s password hashing.
+              Email and password sign-in uses Better Auth&apos;s password hashing.
               Connect Google only while signed in to this account.
             </p>
             {googleLinked ? (

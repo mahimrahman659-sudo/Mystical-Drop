@@ -16,7 +16,7 @@ export default function NotFound() {
         </h1>
         <p className="mt-2 max-w-md text-body-md leading-relaxed text-on-surface-variant">
           The page you were looking for does not exist. Return to the collection to
-          explore the three handcrafted TerraNova fountains.
+          explore the handcrafted Mystical Drop collection.
         </p>
         <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
           <Link href="/" className="btn btn-primary">
@@ -24,7 +24,7 @@ export default function NotFound() {
             <ArrowRightIcon size={17} />
           </Link>
           <Link href="/#collection" className="btn btn-outline">
-            The 3 Fountains
+            Our Fountains
           </Link>
         </div>
       </div>

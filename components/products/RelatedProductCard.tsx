@@ -36,7 +36,9 @@ export function RelatedProductCard({ product }: { product: Product }) {
           <span className="text-label-sm font-semibold uppercase tracking-wider text-secondary">
             {product.catalogNumber}. {product.shortName}
           </span>
-          <span className="text-label-sm text-on-surface-variant">In Stock</span>
+          <span className="text-label-sm text-on-surface-variant">
+            Small Batch
+          </span>
         </div>
         <h3 className="mt-1 font-display text-headline-sm text-on-surface transition-colors group-hover:text-primary">
           <Link href={`/products/${product.slug}`}>{product.name}</Link>

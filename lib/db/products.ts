@@ -1,14 +1,15 @@
 import "server-only";
 
-import { getDb } from "@/lib/db/client";
+import { BRAND_NAME } from "../brand";
+import { getDb } from "./client";
 import {
   PRODUCT_STATUSES,
   toCatalogProduct,
   type CatalogProduct,
   type ProductStatus,
   type StoredProduct,
-} from "@/lib/catalog";
-import type { Product } from "@/lib/products";
+} from "../catalog";
+import type { Product } from "../products";
 
 export const PRODUCT_COLLECTION = "products";
 
@@ -100,7 +101,7 @@ export async function createProduct(input: ProductWriteInput): Promise<StoredPro
     updatedAt: now,
     image: {
       src: input.imageSrc,
-      alt: `${input.name} — handcrafted TerraNova water fountain`,
+      alt: `${input.name} — handcrafted ${BRAND_NAME} water fountain`,
     },
     cartImage: input.gallerySources[0] || input.imageSrc,
     gallery: buildGallery(input.name, input.imageSrc, input.gallerySources),
@@ -117,8 +118,7 @@ export async function createProduct(input: ProductWriteInput): Promise<StoredPro
     ],
     included: ["Low-voltage silent submersible pump"],
     care: {
-      story:
-        "Each TerraNova piece is assembled and finished by hand in the studio. Natural variation in surface, tone, and stone arrangement is part of the work.",
+      story: `Each ${BRAND_NAME} piece is assembled and finished by hand in the studio. Natural variation in surface, tone, and stone arrangement is part of the work.`,
       storyPoints: [
         "Hand-finished details unique to this edition",
         "Quiet pump selected for domestic rooms",
@@ -166,7 +166,7 @@ export async function updateProduct(
     image: {
       ...current.image,
       src: input.imageSrc,
-      alt: `${input.name} — handcrafted TerraNova water fountain`,
+      alt: `${input.name} — handcrafted ${BRAND_NAME} water fountain`,
     },
     cartImage: input.gallerySources[0] || input.imageSrc,
     gallery: buildGallery(input.name, input.imageSrc, input.gallerySources, current.gallery),

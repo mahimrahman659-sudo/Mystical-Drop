@@ -1,8 +1,16 @@
 import Link from "next/link";
+import type { CatalogProduct } from "@/lib/catalog";
+import { BRAND_NAME } from "@/lib/brand";
 import { getActiveProducts } from "@/lib/db/products";
 
 export async function SiteFooter() {
-  const products = await getActiveProducts();
+  let products: CatalogProduct[] = [];
+  let catalogUnavailable = false;
+  try {
+    products = await getActiveProducts();
+  } catch {
+    catalogUnavailable = true;
+  }
 
   return (
     <footer
@@ -14,7 +22,7 @@ export async function SiteFooter() {
           <div className="flex flex-col gap-space-sm">
             <div className="flex items-baseline gap-2">
               <span className="font-display text-headline-sm text-on-surface">
-                TerraNova
+                {BRAND_NAME}
               </span>
             </div>
             <p className="max-w-xs text-body-sm leading-relaxed text-on-surface-variant">
@@ -37,7 +45,7 @@ export async function SiteFooter() {
               id="footer-fountains-heading"
               className="text-label-sm uppercase tracking-wider text-on-surface-variant"
             >
-              The 3 Fountains
+              Our Fountains
             </h2>
             <ul className="space-y-space-xs text-body-sm">
               {products.map((product) => (
@@ -56,6 +64,13 @@ export async function SiteFooter() {
                   </span>
                 </li>
               ))}
+              {products.length === 0 ? (
+                <li className="text-on-surface-variant">
+                  {catalogUnavailable
+                    ? "The fountain collection is temporarily unavailable."
+                    : "No fountains are currently listed."}
+                </li>
+              ) : null}
             </ul>
           </nav>
 
@@ -64,14 +79,14 @@ export async function SiteFooter() {
               Care & Guarantee
             </h2>
             <p className="max-w-sm text-body-sm leading-relaxed text-on-surface-variant">
-              Experience water resonance in your home. Every TerraNova fountain
+              Experience water resonance in your home. Every {BRAND_NAME} fountain
               includes our complimentary 48-Hour In-Home Acoustic Testing
               Guarantee and artisan setup guidance.
             </p>
             <div className="space-y-space-xs pt-space-xs text-body-sm">
               <p className="break-words text-on-surface">
-                <span className="text-on-surface-variant">Support:</span>{" "}
-                care@terranova.example
+                <span className="text-on-surface-variant">Support email:</span>{" "}
+                to be confirmed
               </p>
               <p className="text-on-surface">
                 <span className="text-on-surface-variant">Concierge:</span> +880
@@ -119,7 +134,7 @@ export async function SiteFooter() {
 
         <div className="flex flex-col items-center justify-between gap-space-sm border-t border-outline-variant/30 pt-space-lg sm:flex-row">
           <p className="text-center text-label-sm leading-5 text-on-surface-variant sm:text-left">
-            © 2026 TerraNova. Handcrafted with reverence in Dhaka. Demo
+            © 2026 {BRAND_NAME}. Handcrafted with reverence in Dhaka. Demo
             storefront.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-space-md gap-y-1">

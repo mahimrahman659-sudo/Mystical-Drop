@@ -1,9 +1,11 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  useEffect,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
@@ -25,11 +27,15 @@ import {
   CONFIRMATION_STORAGE_KEY,
   DISTRICT_SUGGESTIONS,
   EMPTY_CHECKOUT,
+  checkoutCartSignature,
+  clearCheckoutAttempt,
+  ensureCheckoutSubmissionKey,
   validateCheckout,
   type CheckoutErrors,
   type CheckoutField,
   type CheckoutValues,
 } from "@/lib/checkout";
+import { BRAND_NAME } from "@/lib/brand";
 import { FREE_SHIPPING } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 
@@ -84,7 +90,7 @@ function CheckoutStepper() {
             </span>
           </div>
           <div aria-hidden="true" className="h-0.5 w-6 rounded-full bg-surface-container-highest sm:w-20" />
-          <div className="flex min-h-10 items-center gap-1.5 text-on-surface-variant/60">
+          <div className="flex min-h-10 items-center gap-1.5 text-on-surface-variant">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-surface-container-high text-label-md text-on-surface-variant">
               3
             </span>
@@ -117,6 +123,23 @@ function describedBy(field: CheckoutField, errors: CheckoutErrors) {
   return errors[field] ? `${FIELD_IDS[field]}-error` : undefined;
 }
 
+function UnavailableNotice({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <div
+      role="alert"
+      className="mt-4 rounded border border-error/25 bg-error-container px-4 py-3 text-body-sm text-on-error-container"
+    >
+      {count} saved {count === 1 ? "fountain is" : "fountains are"} no longer
+      available and {count === 1 ? "has" : "have"} been excluded from checkout.{" "}
+      <Link href="/cart" className="font-semibold underline underline-offset-2">
+        Review your cart
+      </Link>
+      .
+    </div>
+  );
+}
+
 export function CheckoutView() {
   const router = useRouter();
   const {
@@ -126,6 +149,7 @@ export function CheckoutView() {
     total,
     isHydrated,
     catalogError,
+    unavailableLines,
     clearCart,
   } = useCart();
   const { refresh: refreshCatalog } = useCatalog();
@@ -134,8 +158,18 @@ export function CheckoutView() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(true);
-  const [submissionKey] = useState(() => crypto.randomUUID());
+  const [submissionKey, setSubmissionKey] = useState("");
   const submittingRef = useRef(false);
+  const cartSignature = useMemo(
+    () => checkoutCartSignature(items),
+    [items],
+  );
+
+  useEffect(() => {
+    if (!isHydrated || items.length === 0) return;
+    const ensuredKey = ensureCheckoutSubmissionKey(cartSignature);
+    if (ensuredKey !== submissionKey) setSubmissionKey(ensuredKey);
+  }, [isHydrated, items.length, cartSignature, submissionKey]);
 
   function updateField(field: CheckoutField) {
     return (
@@ -183,6 +217,11 @@ export function CheckoutView() {
     submittingRef.current = true;
     setSubmitting(true);
     setSubmitError(null);
+    let attemptKey = submissionKey;
+    if (!attemptKey) {
+      attemptKey = ensureCheckoutSubmissionKey(cartSignature);
+      setSubmissionKey(attemptKey);
+    }
 
     try {
       const response = await fetch("/api/orders", {
@@ -190,7 +229,7 @@ export function CheckoutView() {
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
         body: JSON.stringify({
-          submissionKey,
+          submissionKey: attemptKey,
           customer: {
             fullName: values.fullName.trim(),
             phone: values.phone.trim(),
@@ -213,10 +252,14 @@ export function CheckoutView() {
             order?: { id?: string };
             accessToken?: string;
             message?: string;
+            code?: string;
           }
         | null;
 
       if (!response.ok || !payload?.order?.id || !payload.accessToken) {
+        if (payload?.code === "TOTAL_CHANGED" || payload?.code === "UNAVAILABLE") {
+          await refreshCatalog();
+        }
         throw new Error(
           payload?.message ||
             "We could not place the demo order. Your cart and details are still here, so you can try again.",
@@ -237,6 +280,7 @@ export function CheckoutView() {
         );
       }
 
+      clearCheckoutAttempt(cartSignature);
       clearCart();
       router.push("/order-confirmation");
     } catch (error) {
@@ -292,7 +336,10 @@ export function CheckoutView() {
       <div>
         <CheckoutStepper />
         <section className="site-container py-space-xl">
-          <div className="mx-auto max-w-xl rounded-xl border border-on-surface/[0.05] bg-surface-container-lowest p-space-lg text-center shadow-sm">
+          <div className="mx-auto max-w-xl">
+            <UnavailableNotice count={unavailableLines.length} />
+          </div>
+          <div className="mx-auto mt-4 max-w-xl rounded-xl border border-on-surface/[0.05] bg-surface-container-lowest p-space-lg text-center shadow-sm">
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-container text-secondary">
               <LockIcon size={24} />
             </span>
@@ -318,7 +365,8 @@ export function CheckoutView() {
       <CheckoutStepper />
 
       <section className="site-container pt-space-lg">
-        <div className="mb-space-lg flex flex-col justify-between gap-space-sm rounded-lg border border-tertiary/25 bg-[#fbf4e6] p-space-md sm:flex-row sm:items-center">
+        <UnavailableNotice count={unavailableLines.length} />
+        <div className="mt-space-lg flex flex-col justify-between gap-space-sm rounded-lg border border-tertiary/25 bg-[#fbf4e6] p-space-md sm:flex-row sm:items-center">
           <div className="flex items-start gap-space-sm">
             <span className="mt-0.5 text-secondary">
               <InfoIcon size={23} />
@@ -819,7 +867,7 @@ export function CheckoutView() {
 
                 <div className="mt-space-md flex flex-col gap-3">
                   <p className="text-label-sm uppercase tracking-wider text-on-surface-variant">
-                    TerraNova craft pledges
+                    {BRAND_NAME} craft pledges
                   </p>
                   {[
                     {

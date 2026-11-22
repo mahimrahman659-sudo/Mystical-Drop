@@ -59,6 +59,11 @@ export type OrderStatusEvent = {
   note?: string;
 };
 
+export type CustomerOrderStatusEvent = Pick<
+  OrderStatusEvent,
+  "status" | "changedAt"
+>;
+
 export type OrderConfirmation = {
   id: string;
   reference: string;
@@ -73,7 +78,7 @@ export type OrderConfirmation = {
   paymentStatus: PaymentStatus;
   demo: true;
   fulfillmentStatus: FulfillmentStatus;
-  statusHistory: OrderStatusEvent[];
+  statusHistory: CustomerOrderStatusEvent[];
   deliveryEstimate: string;
   deliveryEstimateNote: string;
 };

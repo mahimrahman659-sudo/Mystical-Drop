@@ -3,8 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getAdminViewer } from "@/lib/admin/auth";
 import { listImageAssets } from "@/lib/admin/images";
-import { getAdminProducts } from "@/lib/db/products";
-import { getAdminOrderStats } from "@/lib/db/orders";
+import { countActiveProducts, getAdminProducts } from "@/lib/db/products";
 import { formatPrice } from "@/lib/format";
 import { formatOrderDate } from "@/lib/orders";
 import { setProductStatusAction } from "@/app/admin/products/actions";
@@ -30,7 +29,7 @@ export default async function AdminProductsPage({ searchParams }: ProductsPagePr
   const query = value(params.q);
   const products = await getAdminProducts(query);
   const assets = await listImageAssets();
-  const stats = await getAdminOrderStats();
+  const activeProducts = await countActiveProducts();
   const saved = value(params.saved);
   const error = value(params.error);
 
@@ -44,7 +43,7 @@ export default async function AdminProductsPage({ searchParams }: ProductsPagePr
           </h1>
           <p className="mt-1 text-body-sm text-on-surface-variant">
             {products.length} matching {products.length === 1 ? "product" : "products"} •{" "}
-            {stats.activeProducts} active in storefront
+            {activeProducts} active in storefront
           </p>
         </div>
         <Link href="/admin/products/new" className="btn btn-primary">

@@ -15,12 +15,13 @@ import {
   MenuIcon,
   SearchIcon,
 } from "@/components/ui/icons";
+import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 
 const navItems = [
   { href: "/", label: "Home", match: (pathname: string) => pathname === "/" },
   {
     href: "/#collection",
-    label: "The 3 Fountains",
+    label: "Our Fountains",
     match: (pathname: string) => pathname.startsWith("/products"),
   },
   { href: "/#about", label: "About" },
@@ -53,17 +54,17 @@ export function SiteHeader() {
         <Link
           href="/"
           className="group flex shrink-0 flex-col"
-          aria-label="TerraNova — return to homepage"
+          aria-label={`${BRAND_NAME} — return to homepage`}
         >
-          <span className="font-display text-[22px] leading-none tracking-tight text-on-surface transition-colors group-hover:text-primary sm:text-headline-md">
-            TerraNova
+          <span className="whitespace-nowrap font-display text-[19px] leading-none tracking-tight text-on-surface transition-colors group-hover:text-primary sm:text-headline-md">
+            {BRAND_NAME}
           </span>
           <span className="mt-1 text-[8px] uppercase leading-none tracking-[0.15em] text-on-surface-variant sm:text-label-sm sm:tracking-[0.13em]">
-            Artisanal Water Features
+            {BRAND_TAGLINE}
           </span>
         </Link>
 
-        <nav aria-label="Main navigation" className="hidden items-center gap-space-lg md:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-4 md:flex lg:gap-space-lg">
           {navItems.map((item) => {
             const active = item.match?.(pathname);
             return (
@@ -71,7 +72,7 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`text-label-lg transition-colors hover:text-on-surface ${
+                className={`whitespace-nowrap text-label-lg transition-colors hover:text-on-surface ${
                   active ? "font-medium text-primary" : "text-on-surface-variant"
                 }`}
               >
@@ -87,7 +88,8 @@ export function SiteHeader() {
             onClick={() => setSearchOpen(true)}
             aria-label="Search fountains"
             aria-haspopup="dialog"
-            className="icon-button"
+            aria-expanded={searchOpen}
+            className="icon-button hidden md:inline-flex"
           >
             <SearchIcon size={20} />
           </button>
@@ -96,6 +98,7 @@ export function SiteHeader() {
             onClick={() => setFavoritesOpen(true)}
             aria-label={`Favorites, ${count} saved`}
             aria-haspopup="dialog"
+            aria-expanded={favoritesOpen}
             className="icon-button relative hidden md:inline-flex"
           >
             <HeartIcon size={20} filled={count > 0} />
@@ -126,10 +129,10 @@ export function SiteHeader() {
           </Link>
           <span
             aria-hidden="true"
-            title="TerraNova studio seal"
+            title={`${BRAND_NAME} studio seal`}
             className="ml-1 hidden h-8 w-8 items-center justify-center rounded-full border border-outline-variant/60 bg-surface-container font-display text-[10px] font-semibold tracking-tight text-primary xl:flex"
           >
-            TN
+            MD
           </span>
           <button
             type="button"

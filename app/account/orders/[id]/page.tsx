@@ -21,7 +21,7 @@ import { formatPrice } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Order details",
-  description: "Your private TerraNova order.",
+  description: "Your private Mystical Drop order.",
   robots: { index: false, follow: false },
 };
 
@@ -224,7 +224,6 @@ export default async function AccountOrderPage({ params }: OrderPageProps) {
                     </p>
                     <p className="text-on-surface-variant">
                       {formatOrderDate(event.changedAt)}
-                      {event.changedBy ? ` • ${event.changedBy.email}` : ""}
                     </p>
                   </li>
                 ))}

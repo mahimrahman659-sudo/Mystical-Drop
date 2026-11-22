@@ -14,6 +14,7 @@ import {
   ShieldIcon,
   WavesIcon,
 } from "@/components/ui/icons";
+import { BRAND_NAME } from "@/lib/brand";
 import { formatDeliveryAddress } from "@/lib/checkout";
 import { CONFIRMATION_STORAGE_KEY } from "@/lib/checkout";
 import { formatOrderDate, type OrderConfirmation } from "@/lib/orders";
@@ -169,7 +170,7 @@ export function ConfirmationView() {
       />
       <div className="mx-auto max-w-4xl px-margin-mobile pb-space-xl pt-space-md sm:px-space-md lg:px-0">
         <div className="print-only mb-6 border-b border-outline-variant pb-4">
-          <p className="font-display text-headline-md text-on-surface">TerraNova</p>
+          <p className="font-display text-headline-md text-on-surface">{BRAND_NAME}</p>
           <p className="text-body-sm text-on-surface-variant">
             Demo order summary • Not a live invoice
           </p>
@@ -202,7 +203,7 @@ export function ConfirmationView() {
             Your Demo Order Has Been Placed!
           </h1>
           <p className="mx-auto mt-2 max-w-2xl text-body-lg leading-relaxed text-on-surface-variant">
-            Thank you for exploring TerraNova. This is a demo confirmation:
+            Thank you for exploring {BRAND_NAME}. This is a demo confirmation:
             no payment has been collected and no fountain will be dispatched.
           </p>
           <p className="mx-auto mt-3 inline-flex rounded-full bg-secondary-container px-3 py-1 text-label-sm font-semibold uppercase tracking-wider text-on-secondary-container">
@@ -521,7 +522,7 @@ export function ConfirmationView() {
             About this demo confirmation
           </p>
           <p className="mx-auto mt-1 max-w-2xl text-body-sm leading-relaxed text-on-surface-variant">
-            This demo order is stored in TerraNova&apos;s database and appears in
+            This demo order is stored in {BRAND_NAME}&apos;s database and appears in
             the admin panel. No payment, courier booking, email, or SMS has been
             created. Support and tracking are not shown because this storefront
             has no live fulfilment destination.

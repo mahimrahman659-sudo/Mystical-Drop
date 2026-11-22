@@ -3,31 +3,32 @@ import type { ReactNode } from "react";
 import { SiteFooter } from "@/components/footer/SiteFooter";
 import { SiteHeader } from "@/components/header/SiteHeader";
 import { Providers } from "@/components/Providers";
+import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
-    default: "TerraNova — Artisanal Water Features",
-    template: "%s • TerraNova",
+    default: `${BRAND_NAME} — ${BRAND_TAGLINE}`,
+    template: `%s • ${BRAND_NAME}`,
   },
   description:
     "Handcrafted indoor water fountains from Bengal, designed for meditative calm, acoustic stillness, and mindful spaces.",
-  applicationName: "TerraNova",
+  applicationName: BRAND_NAME,
   keywords: [
-    "TerraNova",
+    BRAND_NAME,
     "handcrafted fountains",
     "Bangladesh",
     "indoor water fountain",
     "artisanal stoneware",
   ],
   openGraph: {
-    title: "TerraNova — Artisanal Water Features",
+    title: `${BRAND_NAME} — ${BRAND_TAGLINE}`,
     description:
-      "Three handcrafted indoor fountains, shaped in small batches for quiet, restorative spaces.",
+      "Handcrafted indoor fountains, shaped in small batches for quiet, restorative spaces.",
     type: "website",
-    siteName: "TerraNova",
+    siteName: BRAND_NAME,
   },
 };
 

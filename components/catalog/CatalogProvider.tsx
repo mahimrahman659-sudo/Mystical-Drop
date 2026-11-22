@@ -52,7 +52,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     function onStorage(event: StorageEvent) {
-      if (event.key === "terranova-catalog-refresh") void refresh();
+      if (event.key === "mystical-drop-catalog-refresh") void refresh();
     }
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);

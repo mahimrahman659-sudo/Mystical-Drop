@@ -33,14 +33,14 @@ async function main() {
   });
   const captureFile = path.join(
     os.tmpdir(),
-    `terranova-smtp-${Date.now()}-${randomBytes(4).toString("hex")}.jsonl`,
+    `mystical-drop-smtp-${Date.now()}-${randomBytes(4).toString("hex")}.jsonl`,
   );
   const smtp = await startTestSmtp(captureFile);
 
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     MONGODB_URI: mongo.getUri(),
-    MONGODB_DB_NAME: `terranova_e2e_${Date.now()}`,
+    MONGODB_DB_NAME: `mystical_drop_e2e_${Date.now()}`,
     BETTER_AUTH_SECRET: randomBytes(32).toString("hex"),
     BETTER_AUTH_URL: BASE_URL,
     PLAYWRIGHT_BASE_URL: BASE_URL,
@@ -51,7 +51,7 @@ async function main() {
     SMTP_HOST: "127.0.0.1",
     SMTP_PORT: String(smtp.port),
     SMTP_SECURE: "false",
-    SMTP_FROM: "TerraNova <no-reply@example.com>",
+    SMTP_FROM: "Mystical Drop <no-reply@example.com>",
     E2E_SMTP_CAPTURE_FILE: captureFile,
     NEXT_TELEMETRY_DISABLED: "1",
   };

@@ -107,6 +107,48 @@ async function freshReference(): Promise<string> {
   return `TNV-${randomInt(10000, 100000)}`;
 }
 
+function selectionSignature(
+  lines: Array<{ slug: string; quantity: number }>,
+): string {
+  return lines
+    .map((line) => `${line.slug}:${line.quantity}`)
+    .sort()
+    .join("|");
+}
+
+function existingSubmission(
+  existing: OrderDocument,
+  input: CreateOrderInput,
+): CreateOrderResult {
+  if (existing.userId && existing.userId !== input.userId) {
+    throw new OrderError(
+      409,
+      "SUBMISSION_CONFLICT",
+      "This checkout submission belongs to another account.",
+    );
+  }
+  if (
+    selectionSignature(existing.items) !==
+    selectionSignature(input.selections)
+  ) {
+    throw new OrderError(
+      409,
+      "SUBMISSION_CONFLICT",
+      "This checkout attempt was already used for a different cart.",
+    );
+  }
+
+  const existingToken = orderAccessToken(
+    existing._id!.toHexString(),
+    existing.submissionKey,
+  );
+  return {
+    order: toOrderConfirmation(existing),
+    accessToken: existingToken,
+    created: false,
+  };
+}
+
 export async function createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
   if (!input.selections.length) {
     throw new OrderError(400, "EMPTY_CART", "Your cart is empty.");
@@ -117,6 +159,13 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
   }
 
   const collection = getDb().collection<OrderDocument>(ORDER_COLLECTION);
+  const previousSubmission = await collection.findOne({
+    submissionKey: input.submissionKey,
+  });
+  if (previousSubmission) {
+    return existingSubmission(previousSubmission, input);
+  }
+
   const slugs = Array.from(new Set(input.selections.map((line) => line.slug)));
 
   const docs = await getDb()
@@ -211,22 +260,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
       if (error.keyPattern?.submissionKey) {
         const existing = await collection.findOne({ submissionKey: input.submissionKey });
         if (!existing) throw error;
-        if (existing.userId && existing.userId !== input.userId) {
-          throw new OrderError(
-            409,
-            "SUBMISSION_CONFLICT",
-            "This checkout submission belongs to another account.",
-          );
-        }
-        const existingToken = orderAccessToken(
-          existing._id!.toHexString(),
-          existing.submissionKey,
-        );
-        return {
-          order: toOrderConfirmation(existing),
-          accessToken: existingToken,
-          created: false,
-        };
+        return existingSubmission(existing, input);
       }
 
       if (error.keyPattern?.reference) {
@@ -259,7 +293,10 @@ export function toOrderConfirmation(order: OrderDocument): OrderConfirmation {
     paymentStatus: order.paymentStatus,
     demo: true,
     fulfillmentStatus: order.fulfillmentStatus,
-    statusHistory: order.statusHistory,
+    statusHistory: order.statusHistory.map(({ status, changedAt }) => ({
+      status,
+      changedAt,
+    })),
     deliveryEstimate: order.deliveryEstimate,
     deliveryEstimateNote: order.deliveryEstimateNote,
   };
