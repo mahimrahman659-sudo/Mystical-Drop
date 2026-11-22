@@ -43,7 +43,7 @@ export default async function AdminOverviewPage() {
             Overview
           </h1>
           <p className="mt-1 text-body-sm text-on-surface-variant">
-            Live counts from the TerraNova MongoDB database.
+            Live counts from the Mystical Drop MongoDB database.
           </p>
         </div>
         <Link href="/admin/orders" className="btn btn-outline">

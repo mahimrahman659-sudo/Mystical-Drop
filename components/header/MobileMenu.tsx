@@ -8,6 +8,7 @@ import { sanitizeReturnTo } from "@/lib/auth/return-to";
 import { useCart } from "@/components/cart/CartProvider";
 import { useFavorites } from "@/components/favorites/FavoritesProvider";
 import { Dialog } from "@/components/ui/Dialog";
+import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 import {
   ArrowRightIcon,
   BagIcon,
@@ -27,7 +28,7 @@ type MobileMenuProps = {
 
 const navItems = [
   { href: "/", label: "Home" },
-  { href: "/#collection", label: "The 3 Fountains" },
+  { href: "/#collection", label: "Our Fountains" },
   { href: "/#about", label: "About" },
   { href: "/#contact", label: "Contact" },
 ];
@@ -74,10 +75,10 @@ export function MobileMenu({
       <div className="flex items-start justify-between border-b border-outline-variant/30 px-5 py-5">
         <div>
           <p className="font-display text-headline-md tracking-tight text-on-surface">
-            TerraNova
+            {BRAND_NAME}
           </p>
           <p className="mt-0.5 text-label-sm uppercase tracking-[0.18em] text-on-surface-variant">
-            Artisanal Water Features
+            {BRAND_TAGLINE}
           </p>
           <h2 id="mobile-menu-title" className="sr-only">
             Site menu

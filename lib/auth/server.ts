@@ -4,6 +4,7 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { nextCookies } from "better-auth/next-js";
 import { APIError } from "better-auth/api";
+import { BRAND_NAME } from "../brand";
 import { getDb } from "@/lib/db/client";
 import {
   sendPasswordResetEmail,
@@ -13,13 +14,19 @@ import {
 function createAuth() {
   const baseURL = getBaseUrl();
   const google = googleIsConfigured();
+  const trustedOrigins = [
+    baseURL,
+    ...(process.env.NODE_ENV === "production"
+      ? []
+      : ["http://localhost:3000", "http://127.0.0.1:3000"]),
+  ];
 
   return betterAuth({
-    appName: "TerraNova",
+    appName: BRAND_NAME,
     baseURL,
     secret: getSecret(),
     database: mongodbAdapter(getDb()),
-    trustedOrigins: [baseURL, "http://localhost:3000", "http://127.0.0.1:3000"],
+    trustedOrigins,
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: true,
@@ -109,7 +116,7 @@ function createAuth() {
 type AuthInstance = ReturnType<typeof createAuth>;
 
 const globalForAuth = globalThis as unknown as {
-  __terranovaAuth?: AuthInstance;
+  __mysticalDropAuth?: AuthInstance;
 };
 
 export function googleIsConfigured(): boolean {
@@ -120,10 +127,14 @@ export function googleIsConfigured(): boolean {
 }
 
 export function getBaseUrl(): string {
-  return (
-    process.env.BETTER_AUTH_URL?.trim().replace(/\/$/, "") ||
-    "http://localhost:3000"
-  );
+  const configured = process.env.BETTER_AUTH_URL?.trim().replace(/\/$/, "");
+  if (configured) return configured;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "BETTER_AUTH_URL is not configured. Set it to the deployed application origin.",
+    );
+  }
+  return "http://localhost:3000";
 }
 
 function getSecret(): string {
@@ -137,7 +148,7 @@ function getSecret(): string {
 }
 
 export function getAuth(): AuthInstance {
-  if (globalForAuth.__terranovaAuth) return globalForAuth.__terranovaAuth;
-  globalForAuth.__terranovaAuth = createAuth();
-  return globalForAuth.__terranovaAuth;
+  if (globalForAuth.__mysticalDropAuth) return globalForAuth.__mysticalDropAuth;
+  globalForAuth.__mysticalDropAuth = createAuth();
+  return globalForAuth.__mysticalDropAuth;
 }

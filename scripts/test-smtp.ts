@@ -27,10 +27,11 @@ export async function startTestSmtp(captureFile: string): Promise<{
           appendFileSync(
             captureFile,
             `${JSON.stringify({
+              from: addressText(mail.from),
               to: addressText(mail.to),
               subject,
               text: mail.text ?? "",
-              kind: /reset your terranova password/i.test(subject)
+              kind: /reset your mystical drop password/i.test(subject)
                 ? "password-reset"
                 : "verification",
               createdAt: new Date().toISOString(),

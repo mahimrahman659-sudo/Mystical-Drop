@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { expect, type APIRequestContext, type BrowserContext, type Page } from "@playwright/test";
 import { MongoClient, type Db } from "mongodb";
@@ -43,6 +44,7 @@ export async function resetTestDatabase(): Promise<void> {
 }
 
 export type TestMail = {
+  from: string;
   to: string;
   subject: string;
   text: string;
@@ -178,30 +180,41 @@ export async function registerVerifyAndLogin(
   await loginViaUi(page, input.email, input.password, input.returnTo ?? "/account");
 }
 
-export function runDbSetup(): string {
-  const command = process.platform === "win32" ? "npx.cmd" : "npx";
-  return execFileSync(command, ["tsx", "scripts/setup-db.ts"], {
-    cwd: process.cwd(),
-    env: process.env,
-    encoding: "utf8",
-    timeout: 60_000,
-    shell: process.platform === "win32",
-  });
-}
-
-export function promoteAdmin(email: string): void {
-  const command = process.platform === "win32" ? "npx.cmd" : "npx";
-  const output = execFileSync(
-    command,
-    ["tsx", "scripts/promote-admin.ts", `--email=${email}`],
-    {
+function runTsxScript(script: string, args: string[]): string {
+  const tsxCli = path.join(
+    process.cwd(),
+    "node_modules",
+    "tsx",
+    "dist",
+    "cli.mjs",
+  );
+  try {
+    return execFileSync(process.execPath, [tsxCli, script, ...args], {
       cwd: process.cwd(),
       env: process.env,
       encoding: "utf8",
-      timeout: 60_000,
-      shell: process.platform === "win32",
-    },
-  );
+      timeout: 120_000,
+    });
+  } catch (error) {
+    const failure = error as {
+      message?: string;
+      stdout?: string;
+      stderr?: string;
+    };
+    throw new Error(
+      `Script ${script} failed: ${failure.stderr || failure.stdout || failure.message || "unknown error"}`,
+    );
+  }
+}
+
+export function runDbSetup(): string {
+  return runTsxScript("scripts/setup-db.ts", []);
+}
+
+export function promoteAdmin(email: string): void {
+  const output = runTsxScript("scripts/promote-admin.ts", [
+    `--email=${email}`,
+  ]);
   if (!/Promoted verified account/i.test(output)) {
     throw new Error(`Unexpected admin promotion output: ${output}`);
   }

@@ -1,3 +1,4 @@
+import { rebrandLegacyText } from "./brand";
 import type { Product } from "@/lib/products";
 
 export const PRODUCT_STATUSES = ["active", "archived"] as const;
@@ -29,9 +30,15 @@ export function toCatalogProduct(product: StoredProduct): CatalogProduct {
     description: product.description,
     longDescription: product.longDescription,
     features: product.features,
-    image: product.image,
+    image: {
+      ...product.image,
+      alt: rebrandLegacyText(product.image.alt),
+    },
     cartImage: product.cartImage,
-    gallery: product.gallery,
+    gallery: product.gallery.map((image) => ({
+      ...image,
+      alt: rebrandLegacyText(image.alt),
+    })),
     specs: product.specs,
     included: product.included,
     care: product.care,

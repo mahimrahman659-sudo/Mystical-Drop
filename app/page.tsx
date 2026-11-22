@@ -8,6 +8,7 @@ import {
   TruckIcon,
   WavesIcon,
 } from "@/components/ui/icons";
+import { BRAND_NAME } from "@/lib/brand";
 import { getActiveProducts } from "@/lib/db/products";
 import { getSiteBanner } from "@/lib/db/site-settings";
 
@@ -119,9 +120,9 @@ export default async function HomePage() {
       >
         <div className="site-container">
           <div className="mx-auto mb-space-xl flex max-w-2xl flex-col items-center text-center">
-            <span className="eyebrow mb-2 text-primary">Exclusive Triptych</span>
+            <span className="eyebrow mb-2 text-primary">The Collection</span>
             <h2 className="font-display text-[2rem] leading-tight tracking-tight text-on-surface sm:text-display-md">
-              Our Three Handcrafted Fountains
+              Our Fountains
             </h2>
             <p className="mt-3 max-w-lg text-body-md leading-relaxed text-on-surface-variant">
               Meticulously sculpted by local Bengal artisans. Each piece is tested
@@ -129,11 +130,22 @@ export default async function HomePage() {
               moisture.
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-gutter md:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard key={product.slug} product={product} />
-            ))}
-          </div>
+          {products.length === 0 ? (
+            <div className="mx-auto max-w-xl rounded-xl border border-on-surface/[0.05] bg-surface-container-lowest p-8 text-center shadow-sm">
+              <h3 className="font-display text-headline-sm text-on-surface">
+                The collection is being prepared
+              </h3>
+              <p className="mt-2 text-body-sm text-on-surface-variant">
+                New handcrafted pieces will appear here when they are available.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-gutter md:grid-cols-2 xl:grid-cols-3">
+              {products.map((product) => (
+                <ProductCard key={product.slug} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -171,10 +183,10 @@ export default async function HomePage() {
               Designed to Bring Peace Into Your Space.
             </h2>
             <p className="text-body-lg leading-relaxed text-on-surface-variant">
-              TerraNova was born from a singular obsession: to counteract the hurried
+              {BRAND_NAME} was born from a singular obsession: to counteract the hurried
               cadence of modern city life through the restorative presence of
               running water. Rather than mass-manufacturing plastic decor, we
-              produce only three distinct water fountain designs.
+              produce a small, deliberate collection of water fountain designs.
             </p>
             <p className="text-body-md leading-relaxed text-on-surface-variant">
               Each fountain merges handcrafted Bengal clay craft, natural river
@@ -202,7 +214,7 @@ export default async function HomePage() {
               <div aria-hidden="true" className="hidden h-10 w-px bg-outline/20 sm:block" />
               <div className="flex flex-col">
                 <span className="font-display text-headline-md font-semibold text-on-surface">
-                  3 Only
+                  {products.length}
                 </span>
                 <span className="text-label-sm uppercase tracking-wider text-on-surface-variant">
                   Bespoke Editions

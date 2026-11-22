@@ -9,7 +9,8 @@ import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 export const metadata: Metadata = {
   title: "Create account",
-  description: "Create a TerraNova customer account.",
+  description: "Create a Mystical Drop customer account.",
+  robots: { index: false, follow: false },
 };
 
 type RegisterPageProps = {

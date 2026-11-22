@@ -48,6 +48,7 @@ test("operator promotion is idempotent and admin boundaries are enforced", async
     page.getByRole("link", { name: "Admin panel", exact: true }),
   ).toBeVisible();
   await page.goto("/admin");
+  await expect(page).toHaveTitle("Overview • Mystical Drop");
   await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
   await expect(page.getByText("Payment is not collected")).toBeVisible();
 
@@ -63,6 +64,16 @@ test("operator promotion is idempotent and admin boundaries are enforced", async
   await expect(
     customerPage.getByRole("heading", { name: "This area is restricted" }),
   ).toBeVisible();
+  const uploadAttempt = await customerPage.request.post("/api/admin/media", {
+    multipart: {
+      file: {
+        name: "blocked.png",
+        mimeType: "image/png",
+        buffer: Buffer.from("not-an-image"),
+      },
+    },
+  });
+  expect(uploadAttempt.status()).toBe(403);
   await customerContext.close();
 
   const anonymousContext = await browser.newContext();
@@ -177,6 +188,7 @@ test("product editing, validation, archival, and setup idempotency", async ({
 });
 
 test("admin order search, filters, permitted transitions, and stale/invalid updates", async ({
+  browser,
   page,
   request,
 }) => {
@@ -223,8 +235,16 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
   await expect(page.getByText(`#${first.reference}`)).toBeVisible();
   await expect(page.getByText(`#${second.reference}`)).toBeVisible();
 
+  await createVerifiedUserDirect(request, {
+    name: "Second Admin",
+    email: "admin.two@example.com",
+    password: "AdminTwoPass123",
+    role: "admin",
+  });
   await page.goto(firstUrl, { waitUntil: "networkidle" });
-  const stalePage = await page.context().newPage();
+  const secondAdminContext = await browser.newContext();
+  const stalePage = await secondAdminContext.newPage();
+  await loginViaUi(stalePage, "admin.two@example.com", "AdminTwoPass123");
   await stalePage.goto(firstUrl, { waitUntil: "networkidle" });
 
   await page.getByRole("button", { name: /Mark as Confirmed/ }).click();
@@ -236,9 +256,24 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
   expect(confirmed?.statusHistory.at(-1).changedBy.email).toBe("admin@example.com");
   expect(confirmed?.paymentStatus).toBe("not_collected");
 
+  const confirmation = await request.post("/api/orders/confirmation", {
+    data: { orderId: first.id, accessToken: first.accessToken },
+  });
+  expect(confirmation.ok()).toBe(true);
+  const confirmationBody = await confirmation.text();
+  expect(confirmationBody).not.toContain("admin@example.com");
+  const confirmationPayload = JSON.parse(confirmationBody) as {
+    order: { statusHistory: Array<Record<string, unknown>> };
+  };
+  expect(
+    confirmationPayload.order.statusHistory.every(
+      (event) => !("changedBy" in event) && !("note" in event),
+    ),
+  ).toBe(true);
+
   await stalePage.getByRole("button", { name: /Mark as Confirmed/ }).click();
   await stalePage.waitForURL(/error=stale/, { timeout: 30_000 });
-  await stalePage.close();
+  await secondAdminContext.close();
 
   await page.goto(firstUrl, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: /Mark as Shipped/ }).click();
@@ -283,6 +318,146 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
   await page.getByLabel(/Search by reference/).fill("NOPE");
   await page.getByRole("button", { name: "Apply" }).click();
   await expect(page.getByText("No matching orders")).toBeVisible();
+});
+
+test("database setup preserves records and enforces seed identity rules", async ({
+  request,
+}) => {
+  test.slow();
+  const order = await createGuestOrderViaApi(
+    request,
+    [{ slug: "bamboo-cascade", quantity: 1 }],
+    {
+      fullName: "Setup Fixture Order",
+      phone: "01712345678",
+      street: "House 2, Road 4, Banani",
+      city: "Dhaka",
+    },
+  );
+  const db = await getTestDb();
+  const products = db.collection("products");
+
+  const productIndexes = await products.indexes();
+  const seedIndex = productIndexes.find(
+    (index) => index.name === "products_seedId_uidx",
+  );
+  expect(seedIndex?.key).toEqual({ seedId: 1 });
+  expect(seedIndex?.unique).toBe(true);
+  expect(seedIndex?.sparse).toBe(true);
+  expect(
+    productIndexes.find((index) => index.name === "products_slug_uidx"),
+  ).toMatchObject({ key: { slug: 1 }, unique: true });
+  expect(
+    (await db.collection("orders").indexes()).find(
+      (index) => index.name === "orders_submissionKey_uidx",
+    ),
+  ).toMatchObject({ key: { submissionKey: 1 }, unique: true });
+  expect(
+    (await db.collection("account").indexes()).find(
+      (index) => index.name === "account_providerId_accountId_uidx",
+    ),
+  ).toMatchObject({ key: { providerId: 1, accountId: 1 }, unique: true });
+  expect(
+    (await db.collection("siteSettings").indexes()).find(
+      (index) => index.name === "siteSettings_key_uidx",
+    ),
+  ).toMatchObject({ key: { key: 1 }, unique: true });
+  expect(
+    (await db.collection("media").indexes()).find(
+      (index) => index.name === "media_createdAt_idx",
+    ),
+  ).toMatchObject({ key: { createdAt: -1 } });
+
+  await products.insertMany([
+    {
+      name: "Unseeded Studio A",
+      slug: "unseeded-studio-a",
+      catalogNumber: "51",
+      status: "archived",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      name: "Unseeded Studio B",
+      slug: "unseeded-studio-b",
+      catalogNumber: "52",
+      status: "archived",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      name: "Verification Seed Fixture",
+      slug: "verification-seed-fixture",
+      seedId: "verification-seed",
+      catalogNumber: "53",
+      status: "archived",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ]);
+
+  let duplicateSeedRejected = false;
+  try {
+    await products.insertOne({
+      name: "Duplicate Verification Seed",
+      slug: "duplicate-verification-seed",
+      seedId: "verification-seed",
+      catalogNumber: "54",
+      status: "active",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  } catch (error) {
+    duplicateSeedRejected =
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: number }).code === 11000;
+  }
+  expect(duplicateSeedRejected).toBe(true);
+
+  await products.updateOne(
+    { slug: "rustic-tree-stone-well" },
+    { $set: { price: 4321, status: "archived" } },
+  );
+
+  const firstSetup = runDbSetup();
+  const secondSetup = runDbSetup();
+  expect(firstSetup).toContain("Catalog seed inserted: 0");
+  expect(secondSetup).toContain("Catalog seed inserted: 0");
+  expect(secondSetup).toContain("Seeded catalog rows: 4");
+
+  const editedSeed = await products.findOne({ slug: "rustic-tree-stone-well" });
+  expect(editedSeed?.price).toBe(4321);
+  expect(editedSeed?.status).toBe("archived");
+  expect(
+    await products.countDocuments({ slug: { $in: ["unseeded-studio-a", "unseeded-studio-b"] } }),
+  ).toBe(2);
+  expect(
+    await db.collection("orders").countDocuments({ reference: order.reference }),
+  ).toBe(1);
+  expect(
+    await products.countDocuments({ seedId: "verification-seed" }),
+  ).toBe(1);
+
+  await products.updateOne(
+    { seedId: "bamboo-cascade" },
+    {
+      $set: {
+        "gallery.2.alt":
+          "The three TerraNova fountains arranged together on a warm wooden study desk",
+      },
+    },
+  );
+  const catalog = await request.get("/api/catalog");
+  const catalogBody = (await catalog.json()) as {
+    products: Array<{ slug: string; gallery: Array<{ alt: string }> }>;
+  };
+  const bamboo = catalogBody.products.find(
+    (product) => product.slug === "bamboo-cascade",
+  );
+  expect(bamboo?.gallery[2]?.alt).toContain("Mystical Drop");
+  expect(bamboo?.gallery[2]?.alt).not.toContain("TerraNova");
 });
 
 test("admin can upload a product image and homepage banner", async ({

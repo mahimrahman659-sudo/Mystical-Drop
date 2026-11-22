@@ -1,3 +1,5 @@
+import { BRAND_NAME } from "./brand";
+
 export type ProductGalleryImage = {
   src: string;
   alt: string;
@@ -86,7 +88,7 @@ export const products: Product[] = [
       },
       {
         src: "/images/triptych-study.jpg",
-        alt: "The three TerraNova fountains arranged together on a warm wooden study desk",
+        alt: `The three ${BRAND_NAME} fountains arranged together on a warm wooden study desk`,
         label: "Studio Trio",
         caption: "The 3-Piece Collection",
       },
@@ -159,7 +161,7 @@ export const products: Product[] = [
       },
       {
         src: "/images/triptych-study.jpg",
-        alt: "The three TerraNova fountains arranged together on a warm wooden study desk",
+        alt: `The three ${BRAND_NAME} fountains arranged together on a warm wooden study desk`,
         label: "Angle 03",
         caption: "Studio Trio Context",
       },
@@ -232,7 +234,7 @@ export const products: Product[] = [
       },
       {
         src: "/images/triptych-study.jpg",
-        alt: "The three TerraNova fountains arranged together on a warm wooden study desk",
+        alt: `The three ${BRAND_NAME} fountains arranged together on a warm wooden study desk`,
         label: "Angle 03",
         caption: "Studio Trio Context",
       },

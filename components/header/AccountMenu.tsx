@@ -68,7 +68,7 @@ export function AccountMenu() {
   }
 
   return (
-    <div ref={containerRef} className="relative hidden md:block">
+    <div ref={containerRef} className="relative block">
       <button
         ref={buttonRef}
         type="button"

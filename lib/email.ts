@@ -1,10 +1,12 @@
 import "server-only";
 
 import nodemailer from "nodemailer";
+import { BRAND_NAME } from "./brand";
 import { getDb } from "@/lib/db/client";
 import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
-const FROM = process.env.SMTP_FROM?.trim() || "TerraNova <no-reply@example.com>";
+const FROM =
+  process.env.SMTP_FROM?.trim() || `${BRAND_NAME} <no-reply@example.com>`;
 
 type AuthEmailKind = "verification" | "password-reset";
 
@@ -25,16 +27,16 @@ export async function sendVerificationEmail(to: string, url: string): Promise<vo
   await sendAuthEmail({
     to,
     kind: "verification",
-    subject: "Verify your TerraNova account",
+    subject: `Verify your ${BRAND_NAME} account`,
     text: [
-      "Welcome to TerraNova.",
+      `Welcome to ${BRAND_NAME}.`,
       "",
       "Verify your email address to activate your account and continue to checkout:",
       url,
       "",
       "This link expires in one hour. If you did not create this account, you can ignore this message.",
     ].join("\n"),
-    html: `<p>Welcome to TerraNova.</p><p>Verify your email address to activate your account:</p><p><a href="${escapeHtml(url)}">Verify my email</a></p><p>This link expires in one hour. If you did not create this account, you can ignore this message.</p>`,
+    html: `<p>Welcome to ${BRAND_NAME}.</p><p>Verify your email address to activate your account:</p><p><a href="${escapeHtml(url)}">Verify my email</a></p><p>This link expires in one hour. If you did not create this account, you can ignore this message.</p>`,
   });
 }
 
@@ -42,9 +44,9 @@ export async function sendPasswordResetEmail(to: string, url: string): Promise<v
   await sendAuthEmail({
     to,
     kind: "password-reset",
-    subject: "Reset your TerraNova password",
+    subject: `Reset your ${BRAND_NAME} password`,
     text: [
-      "A password reset was requested for your TerraNova account.",
+      `A password reset was requested for your ${BRAND_NAME} account.`,
       "",
       "Choose a new password:",
       url,
@@ -52,7 +54,7 @@ export async function sendPasswordResetEmail(to: string, url: string): Promise<v
       "This link expires in one hour and can only be used once.",
       "If you did not request this, you can ignore this message.",
     ].join("\n"),
-    html: `<p>A password reset was requested for your TerraNova account.</p><p><a href="${escapeHtml(url)}">Choose a new password</a></p><p>This link expires in one hour and can only be used once. If you did not request this, you can ignore this message.</p>`,
+    html: `<p>A password reset was requested for your ${BRAND_NAME} account.</p><p><a href="${escapeHtml(url)}">Choose a new password</a></p><p>This link expires in one hour and can only be used once. If you did not request this, you can ignore this message.</p>`,
   });
 }
 

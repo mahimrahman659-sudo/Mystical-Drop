@@ -86,10 +86,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         : "bg-secondary-container text-on-secondary-container"
                     }`}
                   >
-                    {archived ? "Archived • Not orderable" : "In Stock • Small Batch"}
+                    {archived
+                      ? "Archived • Not orderable"
+                      : "Made to Order • Small Batch"}
                   </span>
                   <span className="text-label-sm text-on-surface-variant">
-                    Edition {product.catalogNumber} / 03
+                    Edition {product.catalogNumber}
                   </span>
                 </div>
                 {!archived ? (

@@ -1,6 +1,9 @@
 import "./load-env";
-import { normalizeEmail } from "@/lib/db/client";
-import { getDb } from "@/lib/db/client";
+import {
+  getDb,
+  getMongoDatabaseName,
+  normalizeEmail,
+} from "@/lib/db/client";
 
 function argumentValue(name: string): string | undefined {
   const exact = process.argv.find((value) => value.startsWith(`--${name}=`));
@@ -30,6 +33,7 @@ async function main() {
   }
 
   const email = normalizeEmail(emailInput);
+  console.log(`Target database: ${getMongoDatabaseName()}`);
   const user = await getDb().collection("user").findOne({ email });
 
   if (!user) {

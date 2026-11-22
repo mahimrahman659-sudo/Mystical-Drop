@@ -1,7 +1,8 @@
 import { MongoClient, type Db } from "mongodb";
+import { BRAND_NAME } from "../brand";
 
 const globalForMongo = globalThis as unknown as {
-  __terranovaMongo?: {
+  __mysticalDropMongo?: {
     client: MongoClient;
     uri: string;
     dbName: string;
@@ -19,13 +20,19 @@ function requireMongoUri(): string {
 }
 
 export function getMongoDatabaseName(): string {
-  return process.env.MONGODB_DB_NAME?.trim() || "terranova";
+  const dbName = process.env.MONGODB_DB_NAME?.trim();
+  if (!dbName) {
+    throw new Error(
+      "MONGODB_DB_NAME is not configured. Set it to the existing application database name.",
+    );
+  }
+  return dbName;
 }
 
 export function getMongoClient(): MongoClient {
   const uri = requireMongoUri();
   const dbName = getMongoDatabaseName();
-  const cached = globalForMongo.__terranovaMongo;
+  const cached = globalForMongo.__mysticalDropMongo;
 
   if (cached && cached.uri === uri && cached.dbName === dbName) {
     return cached.client;
@@ -36,11 +43,11 @@ export function getMongoClient(): MongoClient {
   }
 
   const client = new MongoClient(uri, {
-    appName: "TerraNova",
+    appName: BRAND_NAME,
     serverSelectionTimeoutMS: 10_000,
   });
 
-  globalForMongo.__terranovaMongo = { client, uri, dbName };
+  globalForMongo.__mysticalDropMongo = { client, uri, dbName };
   return client;
 }
 

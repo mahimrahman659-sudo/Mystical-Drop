@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -9,7 +10,8 @@ import { isDevelopmentMailboxEnabled } from "@/lib/dev-mailbox";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to your TerraNova customer account.",
+  description: "Sign in to your Mystical Drop customer account.",
+  robots: { index: false, follow: false },
 };
 
 type LoginPageProps = {
@@ -35,12 +37,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       belowCard={
         <p className="text-center text-body-sm text-on-surface-variant">
           Prefer to browse without an account?{" "}
-          <a
+          <Link
             href="/checkout"
             className="font-medium text-primary underline underline-offset-2"
           >
             Guest checkout
-          </a>{" "}
+          </Link>{" "}
           is still available.
         </p>
       }

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BRAND_NAME } from "@/lib/brand";
 
 type AuthShellProps = {
   eyebrow?: string;
@@ -52,7 +53,7 @@ export function AuthShell({
           <div className="relative h-[500px] overflow-hidden rounded-xl bg-surface-container">
             <Image
               src="/images/triptych-study.jpg"
-              alt="Three TerraNova handcrafted water fountains arranged on a warm wooden study desk"
+              alt={`Three ${BRAND_NAME} handcrafted water fountains arranged on a warm wooden study desk`}
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="object-cover"

@@ -14,7 +14,7 @@ type SearchDialogProps = {
 };
 
 export function SearchDialog({ open, onClose }: SearchDialogProps) {
-  const { products, isLoaded } = useCatalog();
+  const { products, isLoaded, error } = useCatalog();
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
       <div className="px-5 py-5 sm:px-7">
         <div className="flex items-center justify-between gap-4">
           <p className="font-label-sm uppercase tracking-widest text-on-surface-variant">
-            {query.trim() ? "Matching fountains" : "All three fountains"}
+            {query.trim() ? "Matching fountains" : "All fountains"}
           </p>
           <span className="text-label-sm text-on-surface-variant" aria-live="polite">
             {results.length} {results.length === 1 ? "result" : "results"}
@@ -95,6 +95,13 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
           <p className="mt-4 rounded-lg bg-surface-container-low p-5 text-body-sm text-on-surface-variant">
             Loading the fountain catalog…
           </p>
+        ) : error ? (
+          <div
+            role="alert"
+            className="mt-4 rounded-lg border border-error/25 bg-error-container p-5 text-body-sm text-on-error-container"
+          >
+            {error}
+          </div>
         ) : results.length > 0 ? (
           <ul className="mt-3 divide-y divide-outline-variant/25">
             {results.map((product) => (
@@ -142,7 +149,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
               No fountains match “{query.trim()}”
             </p>
             <p className="mt-2 text-body-sm text-on-surface-variant">
-              Search by the fountain name, or browse all three handcrafted pieces.
+              Search by the fountain name, or browse the full handcrafted collection.
             </p>
             <button
               type="button"

@@ -56,6 +56,7 @@ test("registration, verification, login, logout, duplicate, and role boundary", 
 }) => {
   await page.goto("/register");
   await waitForAppReady(page);
+  await expect(page).toHaveTitle("Create account • Mystical Drop");
   await page.getByLabel(/Full name/).fill("Customer One");
   await page.getByLabel(/Email address/).fill("customer.one@example.com");
   await page.getByLabel(/^Password/).fill("CustomerPass123");
@@ -65,6 +66,7 @@ test("registration, verification, login, logout, duplicate, and role boundary", 
 
   await page.goto("/login");
   await waitForAppReady(page);
+  await expect(page).toHaveTitle("Sign in • Mystical Drop");
   await page.getByLabel(/Email address/).fill("customer.one@example.com");
   await page.getByLabel(/^Password/).fill("CustomerPass123");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -79,6 +81,9 @@ test("registration, verification, login, logout, duplicate, and role boundary", 
     "customer.one@example.com",
     "verification",
   );
+  expect(verificationMail.from).toContain("Mystical Drop");
+  expect(verificationMail.subject).toBe("Verify your Mystical Drop account");
+  expect(verificationMail.text).toContain("Welcome to Mystical Drop.");
   await page.goto(verificationLink(verificationMail));
   await expect(page).toHaveURL(/\/login\?verified=1/);
   await waitForAppReady(page);
@@ -88,6 +93,7 @@ test("registration, verification, login, logout, duplicate, and role boundary", 
   await page.getByLabel(/^Password/).fill("CustomerPass123");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.waitForURL("**/account");
+  await expect(page).toHaveTitle("Your account • Mystical Drop");
   await expect(page.getByRole("heading", { name: "Your quiet corner." })).toBeVisible();
   await expect(page.getByText("customer.one@example.com")).toBeVisible();
 
@@ -95,6 +101,11 @@ test("registration, verification, login, logout, duplicate, and role boundary", 
   const sessionCookie = cookies.find((cookie) => cookie.name.includes("session_token"));
   expect(sessionCookie?.httpOnly).toBe(true);
   expect(sessionCookie?.sameSite).toBe("Lax");
+
+  await page.request.post("/api/auth/update-user", {
+    headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! },
+    data: { name: "Customer One", role: "admin" },
+  });
 
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await page.waitForURL("**/");
@@ -120,6 +131,24 @@ test("registration, verification, login, logout, duplicate, and role boundary", 
   const db = await getTestDb();
   expect(
     await db.collection("user").countDocuments({ email: "customer.one@example.com" }),
+  ).toBe(1);
+  expect(
+    (await db.collection("user").findOne({ email: "customer.one@example.com" }))?.role,
+  ).toBe("customer");
+
+  const normalized = await request.post("/api/auth/sign-up/email", {
+    headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! },
+    data: {
+      name: "Normalized Email",
+      email: "Normalized.Case@Example.com",
+      password: "CustomerPass123",
+    },
+  });
+  expect(normalized.ok()).toBe(true);
+  expect(
+    await db.collection("user").countDocuments({
+      email: "normalized.case@example.com",
+    }),
   ).toBe(1);
 
   const injected = await request.post("/api/auth/sign-up/email", {
@@ -189,6 +218,9 @@ test("password reset is generic, single-use, and revokes the old password", asyn
   ).toBeVisible();
 
   const mail = await waitForMail("reset.customer@example.com", "password-reset");
+  expect(mail.from).toContain("Mystical Drop");
+  expect(mail.subject).toBe("Reset your Mystical Drop password");
+  expect(mail.text).toContain("Mystical Drop account.");
   await page.goto(resetLink(mail));
   await expect(page).toHaveURL(/\/reset-password\?token=/);
   await waitForAppReady(page);
@@ -214,6 +246,28 @@ test("password reset is generic, single-use, and revokes the old password", asyn
   await page.getByLabel(/^Password/).fill("NewPass12345");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.waitForURL("**/account");
+});
+
+test("expired sessions lose access to account pages", async ({
+  page,
+  request,
+}) => {
+  const user = await createVerifiedUserDirect(request, {
+    name: "Expired Session",
+    email: "expired.session@example.com",
+    password: "ExpiredPass123",
+  });
+  await loginViaUi(page, "expired.session@example.com", "ExpiredPass123");
+  const db = await getTestDb();
+  const { ObjectId } = await import("mongodb");
+  await db.collection("session").updateMany(
+    { userId: new ObjectId(user.id) },
+    { $set: { expiresAt: new Date(Date.now() - 60_000) } },
+  );
+
+  await page.goto("/account");
+  await expect(page).toHaveURL(/\/login\?returnTo=%2Faccount/);
+  await expect(page.getByRole("heading", { name: "Welcome back." })).toBeVisible();
 });
 
 test("Google unavailable, simulated OAuth errors, and safe return destinations", async ({
@@ -421,6 +475,9 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
   await expect(
     page.getByText("Demo order summary • Not a live invoice"),
   ).toBeVisible();
+  await expect(
+    page.locator(".print-only").getByText("Mystical Drop"),
+  ).toBeVisible();
   await page.emulateMedia({ media: "screen" });
   await page.evaluate(() => {
     (window as unknown as { __printed?: boolean }).__printed = false;
@@ -466,6 +523,64 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
   expect(secondOrder.order.id).toBe(firstOrder.order.id);
   expect(
     await db.collection("orders").countDocuments({ submissionKey: key }),
+  ).toBe(1);
+
+  await db
+    .collection("products")
+    .updateOne({ slug: "rustic-tree-stone-well" }, { $set: { price: price + 100 } });
+  const retryAfterPriceChange = await request.post("/api/orders", {
+    headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! },
+    data: body,
+  });
+  expect(retryAfterPriceChange.status()).toBe(200);
+  const retriedOrder = (await retryAfterPriceChange.json()) as {
+    order: { id: string };
+  };
+  expect(retriedOrder.order.id).toBe(firstOrder.order.id);
+
+  const bambooPrice = await getProductPrice("bamboo-cascade");
+  const mismatchedCart = await request.post("/api/orders", {
+    headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! },
+    data: {
+      ...body,
+      items: [{ slug: "bamboo-cascade", quantity: 1 }],
+      expectedTotal: bambooPrice,
+    },
+  });
+  expect(mismatchedCart.status()).toBe(409);
+  expect(
+    await db.collection("orders").countDocuments({ submissionKey: key }),
+  ).toBe(1);
+
+  const concurrentKey = crypto.randomUUID();
+  const concurrentBody = {
+    ...body,
+    submissionKey: concurrentKey,
+    items: [{ slug: "bamboo-cascade", quantity: 1 }],
+    expectedTotal: bambooPrice,
+  };
+  const [concurrentFirst, concurrentSecond] = await Promise.all([
+    request.post("/api/orders", {
+      headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! },
+      data: concurrentBody,
+    }),
+    request.post("/api/orders", {
+      headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! },
+      data: concurrentBody,
+    }),
+  ]);
+  expect(
+    [concurrentFirst.status(), concurrentSecond.status()].sort((a, b) => a - b),
+  ).toEqual([200, 201]);
+  const concurrentFirstOrder = (await concurrentFirst.json()) as {
+    order: { id: string };
+  };
+  const concurrentSecondOrder = (await concurrentSecond.json()) as {
+    order: { id: string };
+  };
+  expect(concurrentSecondOrder.order.id).toBe(concurrentFirstOrder.order.id);
+  expect(
+    await db.collection("orders").countDocuments({ submissionKey: concurrentKey }),
   ).toBe(1);
 });
 

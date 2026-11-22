@@ -19,6 +19,34 @@ import {
 import { FREE_SHIPPING } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 
+function UnavailableCartNotice({
+  count,
+  onRemove,
+}: {
+  count: number;
+  onRemove: () => void;
+}) {
+  if (count === 0) return null;
+  return (
+    <div
+      role="alert"
+      className="mt-4 flex flex-col gap-2 rounded border border-error/25 bg-error-container px-4 py-3 text-body-sm text-on-error-container sm:flex-row sm:items-center sm:justify-between"
+    >
+      <span>
+        {count} saved {count === 1 ? "fountain is" : "fountains are"} no longer
+        available and {count === 1 ? "has" : "have"} been excluded from checkout.
+      </span>
+      <button
+        type="button"
+        onClick={onRemove}
+        className="btn btn-outline min-h-9 self-start px-3 py-1.5 text-label-md sm:self-auto"
+      >
+        Remove unavailable items
+      </button>
+    </div>
+  );
+}
+
 export function CartView() {
   const {
     items,
@@ -27,8 +55,10 @@ export function CartView() {
     total,
     isHydrated,
     catalogError,
+    unavailableLines,
     changeQuantity,
     removeItem,
+    removeUnavailable,
     clearCart,
   } = useCart();
   const { refresh: refreshCatalog } = useCatalog();
@@ -109,6 +139,11 @@ export function CartView() {
           </p>
         </div>
 
+        <UnavailableCartNotice
+          count={unavailableLines.length}
+          onRemove={removeUnavailable}
+        />
+
         <div className="mx-auto my-space-lg flex max-w-xl flex-col items-center justify-center rounded-xl border border-on-surface/[0.05] bg-surface-container-lowest px-space-md py-space-xl text-center shadow-sm">
           <div className="mb-space-md flex h-16 w-16 items-center justify-center rounded-full bg-surface-container text-secondary">
             <DropletIcon size={30} />
@@ -167,6 +202,11 @@ export function CartView() {
         </p>
       </div>
 
+      <UnavailableCartNotice
+        count={unavailableLines.length}
+        onRemove={removeUnavailable}
+      />
+
       <div className="mt-space-lg grid grid-cols-1 items-start gap-gutter lg:grid-cols-12 lg:gap-space-lg">
         <div className="flex flex-col gap-space-md lg:col-span-8">
           <div className="hidden grid-cols-12 pb-space-xs text-label-sm uppercase tracking-widest text-on-surface-variant xl:grid">
@@ -211,7 +251,7 @@ export function CartView() {
                       <button
                         type="button"
                         onClick={() => removeItem(line.slug)}
-                        className="mt-2 inline-flex min-h-8 items-center gap-1 self-start text-label-sm text-outline transition-colors hover:text-error"
+                        className="mt-2 inline-flex min-h-8 items-center gap-1 self-start text-label-sm text-on-surface-variant transition-colors hover:text-error"
                         aria-label={`Remove ${line.product.name} from cart`}
                       >
                         <TrashIcon size={15} />
@@ -282,7 +322,7 @@ export function CartView() {
             <button
               type="button"
               onClick={() => setClearOpen(true)}
-              className="min-h-10 text-label-sm uppercase tracking-wider text-outline transition-colors hover:text-error"
+              className="min-h-10 text-label-sm uppercase tracking-wider text-on-surface-variant transition-colors hover:text-error"
             >
               Clear Entire Cart
             </button>

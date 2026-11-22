@@ -18,6 +18,7 @@ import {
   GoogleAuthButton,
   SubmitButton,
 } from "@/components/auth/AuthFields";
+import { BRAND_NAME } from "@/lib/brand";
 import {
   checkAuthEmailDelivery,
   useAuthEmailDelivery,
@@ -231,7 +232,7 @@ export function LoginForm({
       </SubmitButton>
 
       <p className="text-center text-body-sm text-on-surface-variant">
-        New to TerraNova?{" "}
+        New to {BRAND_NAME}?{" "}
         <Link
           href={`/register${returnTo !== "/account" ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`}
           className="font-medium text-primary underline underline-offset-2"
