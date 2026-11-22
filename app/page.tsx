@@ -33,9 +33,9 @@ export default async function HomePage() {
               Bring the Beauty of Flowing Water Into Your Home.
             </h1>
             <p className="max-w-xl text-body-lg leading-relaxed text-on-surface-variant">
-              Discover beautifully handcrafted water fountains that bring nature,
-              tranquility, and elegance to your living space. Hand-shaped in small
-              batches and tuned for quiet domestic sanctuary.
+              Discover beautifully handcrafted tabletop water fountains that bring
+              nature, tranquility, and elegance to your living space. Hand-shaped
+              in small batches and tuned for quiet domestic sanctuary.
             </p>
             <div className="flex flex-wrap items-center gap-space-sm pt-space-xs">
               <Link href="#collection" className="btn btn-primary px-6">

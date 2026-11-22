@@ -6,6 +6,7 @@ import {
   resetTestDatabase,
   seedCart,
   seedConfirmationHandle,
+  waitForAppReady,
 } from "./helpers";
 
 test.beforeEach(async () => {
@@ -99,6 +100,46 @@ test("storefront search, favorites, gallery, and mobile menu", async ({ page }) 
   await page.keyboard.press("Escape");
   await expect(menu).not.toBeVisible();
   await expect(menuButton).toBeFocused();
+});
+
+test("homepage verification metadata and public privacy page", async ({
+  page,
+  request,
+}) => {
+  const homepage = await request.get("/");
+  expect(homepage.status()).toBe(200);
+  const homepageHtml = await homepage.text();
+  expect(homepageHtml).toMatch(
+    /<meta[^>]*google-site-verification[^>]*SrK0VfQ50nOdwRILvb6jaRvHWW6Edd2Ekq84ZdR94S0/,
+  );
+
+  await page.goto("/");
+  await waitForAppReady(page);
+  await expect(page).toHaveTitle("Mystical Drop — Artisanal Water Features");
+  await expect(
+    page.locator('head meta[name="google-site-verification"]'),
+  ).toHaveAttribute(
+    "content",
+    "SrK0VfQ50nOdwRILvb6jaRvHWW6Edd2Ekq84ZdR94S0",
+  );
+  await expect(
+    page.getByText(/tabletop water fountains/i).first(),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator("header")
+      .getByRole("link", { name: "Mystical Drop — return to homepage" }),
+  ).toBeVisible();
+
+  const privacyLink = page.getByRole("link", { name: "Privacy Policy" });
+  await expect(privacyLink).toHaveAttribute("href", "/privacy");
+  await privacyLink.click();
+  await expect(page).toHaveURL(/\/privacy$/);
+  await expect(page).toHaveTitle("Privacy Policy • Mystical Drop");
+  await expect(
+    page.getByRole("heading", { name: "Privacy Policy", level: 1 }),
+  ).toBeVisible();
+  await expect(page.getByText(/Google sign-in is optional/i)).toBeVisible();
 });
 
 test("empty cart is rendered from live catalog availability", async ({ page }) => {

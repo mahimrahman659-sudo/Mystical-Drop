@@ -141,9 +141,12 @@ export async function SiteFooter() {
             <span className="text-label-sm text-on-surface-variant">
               Terms & Acoustic Trial
             </span>
-            <span className="text-label-sm text-on-surface-variant">
+            <Link
+              href="/privacy"
+              className="text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-on-surface hover:underline"
+            >
               Privacy Policy
-            </span>
+            </Link>
           </div>
         </div>
       </div>
