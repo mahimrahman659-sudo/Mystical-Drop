@@ -5,7 +5,7 @@ import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { nextCookies } from "better-auth/next-js";
 import { APIError } from "better-auth/api";
 import { BRAND_NAME } from "../brand";
-import { getDb } from "@/lib/db/client";
+import { getDb, onMongoClientReset } from "@/lib/db/client";
 import {
   sendPasswordResetEmail,
   sendVerificationEmail,
@@ -118,6 +118,14 @@ type AuthInstance = ReturnType<typeof createAuth>;
 const globalForAuth = globalThis as unknown as {
   __mysticalDropAuth?: AuthInstance;
 };
+
+// The auth instance captures a Db bound to the MongoClient that existed when
+// it was created. If that client is discarded (poisoned connection recovery
+// in lib/db/client.ts), the cached instance must go too — otherwise Better
+// Auth keeps querying a dead client and login stays broken in that instance.
+onMongoClientReset(() => {
+  delete globalForAuth.__mysticalDropAuth;
+});
 
 export function googleIsConfigured(): boolean {
   return Boolean(

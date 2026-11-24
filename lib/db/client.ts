@@ -24,10 +24,33 @@ type WatchableClient = {
 
 const watchedClients = new WeakSet<MongoClient>();
 
+type ResetListener = () => void;
+const resetListeners = new Set<ResetListener>();
+
+/**
+ * Registered by modules that cache database-bound objects (e.g. the Better
+ * Auth instance). Fired whenever the cached MongoClient is discarded, so they
+ * can drop state that still points at the dead client.
+ */
+export function onMongoClientReset(listener: ResetListener): void {
+  resetListeners.add(listener);
+}
+
+function notifyResetListeners(): void {
+  for (const listener of resetListeners) {
+    try {
+      listener();
+    } catch {
+      // A broken listener must not block client recovery.
+    }
+  }
+}
+
 function dropIfCurrent(client: MongoClient): void {
   const cached = globalForMongo.__mysticalDropMongo;
   if (cached?.client === client) {
     globalForMongo.__mysticalDropMongo = undefined;
+    notifyResetListeners();
   }
 }
 
@@ -106,7 +129,11 @@ export function getMongoClient(): MongoClient {
     // build a fresh one for this request.
     void cached.client.close().catch(() => undefined);
   } else if (cached) {
+    // Environment changed under a live process; anything still holding the old
+    // client (e.g. the cached auth instance) must be rebuilt too.
     void cached.client.close().catch(() => undefined);
+    globalForMongo.__mysticalDropMongo = undefined;
+    notifyResetListeners();
   }
 
   const client = new MongoClient(uri, {
