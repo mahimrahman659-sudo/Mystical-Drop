@@ -9,6 +9,68 @@ const globalForMongo = globalThis as unknown as {
   };
 };
 
+type WatchableTopology = {
+  s?: { state?: string };
+  on?: (
+    event: string,
+    listener: (previousState: string, nextState: string) => void,
+  ) => void;
+};
+
+type WatchableClient = {
+  s?: { hasBeenClosed?: boolean };
+  topology?: WatchableTopology;
+};
+
+const watchedClients = new WeakSet<MongoClient>();
+
+function dropIfCurrent(client: MongoClient): void {
+  const cached = globalForMongo.__mysticalDropMongo;
+  if (cached?.client === client) {
+    globalForMongo.__mysticalDropMongo = undefined;
+  }
+}
+
+/**
+ * The MongoDB driver closes a topology permanently when a connection attempt
+ * fails (`Topology._connect()` failure path calls `this.close()`), and the
+ * client stays closed for the life of the process. On serverless that used to
+ * poison the cached client for a whole warm instance — every later query
+ * failed with `MongoTopologyClosedError` (surfaced as "Application error" on
+ * /login, /, and product pages).
+ *
+ * Two poison signatures are handled:
+ * - connect-failure: `client.topology` stays attached with state "closed"
+ *   (state may also be observed via the `stateChanged` event once watched);
+ * - explicit `client.close()`: the driver nulls `client.topology` and flags
+ *   `client.s.hasBeenClosed`.
+ *
+ * Either way the cached client is dropped so the next request builds a fresh
+ * one instead of reusing a corpse. The topology only exists once `connect()`
+ * has begun — by then its state has left the initial "closed" value — so an
+ * observed "closed" always means poisoned, never "not started yet".
+ */
+function recoverIfPoisoned(client: MongoClient): void {
+  const raw = client as unknown as WatchableClient;
+
+  if (raw.s?.hasBeenClosed) {
+    dropIfCurrent(client);
+    return;
+  }
+
+  const topology = raw.topology;
+  if (!topology) return;
+
+  if (!watchedClients.has(client)) {
+    watchedClients.add(client);
+    topology.on?.("stateChanged", (_previousState, nextState) => {
+      if (nextState === "closed") dropIfCurrent(client);
+    });
+  }
+
+  if (topology.s?.state === "closed") dropIfCurrent(client);
+}
+
 function requireMongoUri(): string {
   const uri = process.env.MONGODB_URI?.trim();
   if (!uri) {
@@ -35,16 +97,26 @@ export function getMongoClient(): MongoClient {
   const cached = globalForMongo.__mysticalDropMongo;
 
   if (cached && cached.uri === uri && cached.dbName === dbName) {
-    return cached.client;
-  }
-
-  if (cached) {
+    recoverIfPoisoned(cached.client);
+    const current = globalForMongo.__mysticalDropMongo;
+    if (current && current.uri === uri && current.dbName === dbName) {
+      return current.client;
+    }
+    // The cached client was poisoned and has been dropped — fall through and
+    // build a fresh one for this request.
+    void cached.client.close().catch(() => undefined);
+  } else if (cached) {
     void cached.client.close().catch(() => undefined);
   }
 
   const client = new MongoClient(uri, {
     appName: BRAND_NAME,
     serverSelectionTimeoutMS: 10_000,
+    connectTimeoutMS: 10_000,
+    // Serverless instances run a handful of sequential queries; a small pool
+    // keeps connection churn low against Atlas's connection caps.
+    maxPoolSize: 5,
+    maxIdleTimeMS: 30_000,
   });
 
   globalForMongo.__mysticalDropMongo = { client, uri, dbName };
