@@ -12,33 +12,26 @@
 
 ## 1. Pre-merge verification (all must be green)
 
-```powershell
-npx tsc --noEmit          # expect: no output
-npx next lint             # expect: ✔ No ESLint warnings or errors
-npm run build             # expect: build completes, /about + /innovation present
-npm run test:e2e          # expect: 36 passed
-```
+- [x] `npx tsc --noEmit` — no errors (2026-11-24)
+- [x] `npx next lint` — no warnings/errors (2026-11-24)
+- [x] `npm run build` — pass (inside e2e run)
+- [x] `npm run test:e2e` — **36 passed** (2026-11-24)
+- [x] Visual pass — 16 screenshots in `test-results/screenshots/`; home/product/innovation manually reviewed
 
-- [ ] Visual pass over `test-results/screenshots/` (16 images) at owner's discretion — regenerate any time with `npm run test:e2e -- tests/visual-screenshots.spec.ts`.
-- [ ] Manual spot-check on a phone: home → product → cart → menu → `/innovation` → `/about`.
+## 2. Merge & deploy — EXECUTED 2026-11-24 (owner: "push and deploy" + "Promote now, validate live")
 
-## 2. Merge & deploy (separate explicit authorizations required)
+- [x] **Commit:** `fe105ae` "Present original fountain collection with price-safe catalog, rewritten content, and NPD pages" (46 files, +2477/−692)
+- [x] **Push:** `origin/review/mystical-drop-audit-rebrand` (`b57196f..fe105ae`)
+- [x] **Preview:** `dpl_DABPYAcHWXn5LrEWZJM4qra87c14` → `https://mystical-drop-p3eis9bo4-abstract-lifestyle1.vercel.app` (Ready; behind Vercel login wall so HTTP validation was not possible — owner authorized promote-with-live-validation instead)
+- [x] **Promote:** `vercel promote` → production build `dpl_BKeHELR5ivM7x4CeDvssHiHPg3KP` → `https://mystical-drop-ruy6dn2ar-abstract-lifestyle1.vercel.app`, aliased to **mystical-drop.vercel.app** (Ready)
+- [ ] **Not done (separate authorization):** merge to `main` — see §7 warning
 
-Each step needs its own go-ahead — none were performed:
+## 3. Post-deploy data steps — EXECUTED 2026-11-24
 
-- [ ] Owner reviews diff (33 modified + 4 added paths; see implementation summary).
-- [ ] **Authorize commit** → single review commit on `review/mystical-drop-audit-rebrand`.
-- [ ] **Authorize merge/push** to the release branch.
-- [ ] Promote via **validated preview** (preview URL → smoke test → promote). Never a bare production deploy.
-
-## 3. Post-deploy data steps (production DB — destructive steps flagged)
-
-- [ ] Run `npm run setup:db` (idempotent) so the three `fountain-*` seeds + indexes exist. *Safe: uses `$setOnInsert`; never overwrites admin edits; never touches orders.*
-- [ ] **Archive the three legacy demo products** in admin (`bamboo-cascade`, `rustic-tree-stone-well`, `terracotta-pot`) so the storefront shows only the original collection. *(Archive ≠ delete; reversible via Restore.)*
-- [ ] Set the homepage banner if the default (`rustic-well.jpg`) should differ — admin → Site banner.
-- [ ] Verify on production: homepage shows 3 cards with "Price Coming Soon", no `৳` anywhere, Add-to-Cart disabled, `/about` + `/innovation` load, footer phone correct.
-- [ ] Confirm **no historical orders changed**: admin → Orders — pre-existing references/totals intact.
-- [ ] Confirm Google verification meta still present (search console) and `/privacy` behaves as intended.
+- [x] Target DB confirmed as production by fingerprint (banner media `6b032c78a2f84df188b226be` matches live site; `terranova_dev` on Atlas — legacy name)
+- [x] `npm run setup:db` — "Catalog seed inserted: 3", idempotent, indexes in place
+- [x] Archived legacy demos (`bamboo-cascade`, `rustic-tree-stone-well`, `terracotta-pot`) — reversible via admin → Restore; **0 orders existed, none touched**
+- [x] Production validation (28 checks): new homepage/copy live, `/about` + `/innovation` live, all 3 fountain pages 200 with Price Coming Soon + draft badge, no dB/warranty/Savar claims, catalog API = exactly 3 `fountain-*` products **all price null**, legacy slugs absent from home/catalog/search, all images 200, legacy URL serves the (unlinked) Archived view without trust panels. Cart empty-state confirmed via Playwright (client-rendered).
 
 ## 4. Post-release (when owner opens commerce)
 
@@ -54,6 +47,13 @@ Each step needs its own go-ahead — none were performed:
 3. Therefore after any rollback: **archive the `fountain-*` products** (or re-run old-code-compatible seeding) so the old build only serves the priced legacy catalog.
 4. Orders require no rollback action (untouched schema; new orders created during the window remain valid demo records).
 
-## 6. What was intentionally NOT done
+## 7. Open items after release (2026-11-24)
 
-No commits · no pushes · no merges · no deploys · no production/env/DB changes · no dependency or lockfile edits · no payment activation · no deletion of historical orders · no publication of unapproved names/prices · no invented specifications or claims.
+1. **Merge `review/mystical-drop-audit-rebrand` → `main` soon (separate authorization).** Git integration is active: pushes to `main` auto-deploy to production. `main` still holds the old code — an unrelated `main` push without this branch would **revert the live site**. Merging makes the branch state canonical.
+2. Homepage banner: production `siteSettings.homeBanner` still points at the owner-uploaded photo `/api/media/6b032c78a2f84df188b226be` (verified = a real tree-and-well product photo, fetched 2026-11-24). It renders as the hero; change via admin → Site banner if a different image is preferred.
+3. Rollback if needed: `vercel promote https://mystical-drop-b18execn6-abstract-lifestyle1.vercel.app` (old code). DB rollback if required: restore the 3 legacy products from admin (they are archived, not deleted) — new seeds can be archived likewise.
+4. Owner decisions A1–B5 remain open (photos, names, prices, privacy, support email, terms).
+
+## 8. What was intentionally NOT done
+
+No merges to `main` · no Vercel/Render/GitHub settings changes · no dependency or lockfile edits · no payment activation · no deletion of historical orders or products (archive only) · no publication of unapproved names/prices · no invented specifications or claims.
