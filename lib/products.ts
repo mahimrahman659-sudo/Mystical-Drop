@@ -1,5 +1,3 @@
-import { BRAND_NAME } from "./brand";
-
 export type ProductGalleryImage = {
   src: string;
   alt: string;
@@ -25,7 +23,9 @@ export type Product = {
   slug: string;
   name: string;
   shortName: string;
-  price: number;
+  /** Final price in whole BDT. `null` means the price is not confirmed yet —
+   * unpriced products are never purchasable and never show a price. */
+  price: number | null;
   catalogNumber: string;
   provenance: string;
   flowLabel: string;
@@ -44,227 +44,187 @@ export type Product = {
   gallery: ProductGalleryImage[];
   specs: ProductSpec[];
   included: string[];
-  care: ProductCare;
+  care?: ProductCare;
 };
+
+/**
+ * Products whose customer-facing name is a working draft pending owner
+ * confirmation. Render a "draft name" badge for these until the owner
+ * approves final names and this set is cleared.
+ */
+export const DRAFT_NAME_SLUGS: ReadonlySet<string> = new Set([
+  "fountain-01",
+  "fountain-02",
+  "fountain-03",
+]);
 
 export const products: Product[] = [
   {
-    slug: "bamboo-cascade",
-    name: "Bamboo Cascade Water Fountain",
-    shortName: "Bamboo Cascade",
-    price: 3850,
+    slug: "fountain-01",
+    name: "Rustic Miniature Well Fountain",
+    shortName: "Miniature Well",
+    price: null,
     catalogNumber: "01",
-    provenance: "Natural Bamboo",
-    flowLabel: "Trickle",
-    flowDescription: "24 dB Gentle Trickle",
-    collectionLine: "Seasoned Bamboo • River Stone",
-    nativeName: "বাঁশঝাড়ের জলধারা",
+    provenance: "Original Design",
+    flowLabel: "Gentle Pour",
+    flowDescription: "Gentle pour into a miniature well basin",
+    collectionLine: "Original Well Design",
+    nativeName: "",
     description:
-      "Natural multi-tier bamboo stalks with tiered spillways, integrated live plant basin, and hand-selected river stones for desk meditation.",
+      "A rustic miniature well with a stone-textured structure, a hanging bucket on a wooden-style crossbar, and soft blue illumination beneath the pouring water.",
     longDescription:
-      "A three-tier bamboo cascade designed for desks and reading nooks. Seasoned bamboo spillways guide water through a slow, rhythmic drop before it settles into a dark basin of smooth river stones. A quiet companion for small rooms and slower mornings.",
+      "Inspired by rustic village wells, this miniature fountain pairs a stone-textured structure with a wooden-style crossbar and a small hanging bucket. Water gathers in the softly lit basin below, where a touch of blue illumination brings the movement of the flow to life. Built as a decorative tabletop piece, it gives a desk, shelf, or side table a quiet focal point with real character.",
     features: [
-      "3-tier bamboo cascade structure",
-      "Live indoor plant compatible basin",
-      "Low-voltage ultra-quiet submersible pump",
+      "Stone-textured miniature well structure",
+      "Hanging bucket on a wooden-style crossbar",
+      "Soft blue illumination in the water basin",
     ],
     image: {
-      src: "/images/bamboo-cascade.jpg",
-      alt: "Bamboo Cascade Water Fountain with three bamboo spillways watering a dark stone basin filled with river pebbles and green plants",
-    },
-    cartImage: "/images/bamboo-basin.jpg",
-    gallery: [
-      {
-        src: "/images/bamboo-cascade.jpg",
-        alt: "Three-tier bamboo fountain with a black river-stone basin and trailing green plants",
-        label: "Cascade Profile",
-        caption: "Three Bamboo Spillways",
-      },
-      {
-        src: "/images/bamboo-basin.jpg",
-        alt: "Bamboo fountain in a dark ceramic basin surrounded by pebbles in a sunlit room",
-        label: "Basin Detail",
-        caption: "River Stone Basin",
-      },
-      {
-        src: "/images/triptych-study.jpg",
-        alt: `The three ${BRAND_NAME} fountains arranged together on a warm wooden study desk`,
-        label: "Studio Trio",
-        caption: "The 3-Piece Collection",
-      },
-    ],
-    specs: [
-      { label: "Dimensions", value: "26cm × 18cm × 22cm" },
-      { label: "Acoustic Decibel", value: "24 dB (Gentle Trickle)" },
-      { label: "Material Build", value: "Seasoned Bengal bamboo & river basalt" },
-      { label: "Acoustic Pump", value: "220V silent flow-adjust" },
-    ],
-    included: [
-      "Low-voltage silent submersible pump",
-      "Hand-selected river pebbles",
-      "Aquatic plant starter",
-    ],
-    care: {
-      story:
-        "Each Bamboo Cascade is assembled by hand from seasoned bamboo chosen for its straight grain and warm, honeyed tone. The stalks are cut, sanded, and fitted in our Savar studio, then paired with a dark basin and tumbled river stones. Small variations in node spacing and colour are part of the piece.",
-      storyPoints: [
-        "Seasoned bamboo selected for straight grain and clean nodes",
-        "Tiered spillways tuned for a rhythmic, splash-free trickle",
-        "Weighted basin keeps the arrangement stable on a desk",
-      ],
-      setup:
-        "Set the basin on a level surface, fit the bamboo spillways into their cradle, and fill the basin with clean water. Submerge the pump fully, connect the water line, and plug it into a standard 220V outlet. Adjust the pump dial until the water finds a quiet, even cadence.",
-      water:
-        "Filtered or RO water is recommended. Keep the basin topped up so the pump stays fully submerged.",
-      rinse:
-        "Rinse the river stones and wipe the basin with a soft cloth every two weeks. A soft brush can clear plant debris from the spillways.",
-      note: "Never run the pump dry. Empty and dry the basin before storing the fountain or moving it to another room.",
-    },
-  },
-  {
-    slug: "rustic-tree-stone-well",
-    name: "Rustic Tree & Stone Well Fountain",
-    shortName: "Rustic Tree & Stone Well",
-    price: 4200,
-    catalogNumber: "02",
-    provenance: "Kiln Clay & Basalt",
-    flowLabel: "Deep Tone",
-    flowDescription: "22–26 dB Whisper Flow",
-    collectionLine: "Kiln Clay & Basalt • Deep Tone",
-    nativeName: "শাখা ও প্রস্তর কূপ ঝরনা",
-    description:
-      "Textured tree trunk bark sculpture intertwined with a stacked charcoal masonry well reservoir, pouring onto a stone trickle cradle.",
-    longDescription:
-      "A timeless pastoral water feature blending a sculpted tree-trunk pillar with a miniature charcoal-stacked stone well. Water moves in a gentle cascade into a deep reservoir stone bowl, engineered to cultivate a tranquil sanctuary for reading rooms, study consoles, and meditation altars.",
-    features: [
-      "Sculpted bark & masonry well body",
-      "Deep acoustic tone resonance",
-      "Hand-tinted weatherized finish",
-    ],
-    image: {
-      src: "/images/rustic-well.jpg",
-      alt: "Rustic Tree and Stone Well Fountain with a carved tree-trunk pillar beside a charcoal stone well",
+      src: "/images/rustic-lifestyle.jpg",
+      alt: "Rustic miniature well fountain with a stone-textured base, hanging bucket on a wooden crossbar, and softly lit water basin",
     },
     cartImage: "/images/rustic-lifestyle.jpg",
     gallery: [
       {
-        src: "/images/rustic-well.jpg",
-        alt: "Front silhouette of the hand-sculpted tree trunk and charcoal stone well fountain",
-        label: "Angle 01",
-        caption: "Front Silhouette",
-      },
-      {
-        src: "/images/rustic-wellhead.jpg",
-        alt: "Close view of the fountain's textured bark, stone wellhead, and moss details",
-        label: "Angle 02",
-        caption: "Top Wellhead Cavity",
-      },
-      {
-        src: "/images/triptych-study.jpg",
-        alt: `The three ${BRAND_NAME} fountains arranged together on a warm wooden study desk`,
-        label: "Angle 03",
-        caption: "Studio Trio Context",
+        src: "/images/rustic-lifestyle.jpg",
+        alt: "Rustic miniature well fountain pouring water past a hanging bucket into an illuminated basin",
+        label: "View 01",
+        caption: "Well form with hanging bucket",
       },
     ],
     specs: [
-      { label: "Dimensions", value: '8.5" W × 7" D × 12.5" H' },
-      { label: "Acoustic Decibel", value: "22–26 dB (Whisper Flow)" },
-      { label: "Material Build", value: "Kiln clay & basalt mortar" },
-      { label: "Acoustic Pump", value: "220V silent flow-adjust" },
+      {
+        label: "Specifications",
+        value: "Dimensions, materials, and pump details to be confirmed",
+      },
     ],
-    included: [
-      "Silent submersible pump",
-      "Hand-selected river pebbles",
-      "Natural moss highlight",
-    ],
+    included: [],
     care: {
       story:
-        "Every Tree & Stone Well fountain is individually sculpted using time-honoured terracotta methods from Savar, reinforced with natural composite resin for water impermeability. The gnarled trunk is textured by hand to echo old banyan bark, while the stacked well stones are treated with charcoal washes for a damp riverbed luster.",
+        "The design borrows the quiet charm of a village well: a stone-textured structure, a wooden-style crossbar, and a small bucket poised above the water. Blue illumination in the basin highlights the falling water, turning a familiar rustic scene into a small decorative centerpiece.",
       storyPoints: [
-        "Double-fired terracotta stoneware core limits algae adhesion",
-        "Textured stone mortar surfaces help prevent unrefined splashing",
-        "Balanced weight base resists tipping on study desks",
+        "Rustic well form rendered in miniature tabletop scale",
+        "Hanging bucket and crossbar create a recognizable focal detail",
+        "Illuminated basin adds a gentle glow to the water",
       ],
-      setup:
-        "Fill the reservoir stone well with 500ml of clean drinking water, submerge the silent pump, and plug it into a standard 220V household outlet. Setup takes less than 90 seconds with no complicated plumbing.",
-      water:
-        "Filtered or RO water is recommended to prevent mineral lime residue in the well basin.",
-      rinse:
-        "Wipe the interior reservoir with a soft cotton cloth once every two weeks. Use a small brush for the crevices between the stacked stones.",
-      note: "The pump speed dial can be turned between (+) and (−) to tailor the water cadence from a sleepy trickle to a brisk rivulet.",
+      setup: "",
+      water: "",
+      rinse: "",
+      note: "",
     },
   },
   {
-    slug: "terracotta-pot",
-    name: "Terracotta Pot Water Fountain",
-    shortName: "Terracotta Pot",
-    price: 3450,
-    catalogNumber: "03",
-    provenance: "Fired Terracotta",
-    flowLabel: "Calming Stream",
-    flowDescription: "25 dB Calming Stream",
-    collectionLine: "Fired Terracotta • Calming Stream",
-    nativeName: "মাটির কলসীর ঝরনা",
+    slug: "fountain-02",
+    name: "Twin-Bowl Cascade Fountain",
+    shortName: "Twin-Bowl Cascade",
+    price: null,
+    catalogNumber: "02",
+    provenance: "Original Design",
+    flowLabel: "Cascade",
+    flowDescription: "Two-level cascade into a rounded basin",
+    collectionLine: "Original Cascade Design",
+    nativeName: "",
     description:
-      "Traditional Bengal kiln-fired clay pitcher with curved overflow spout, organic river rock stack, and ambient miniature garden rim.",
+      "A cascading tabletop fountain with two coconut-shell-style bowls, decorative greenery, smooth pebbles, and a rounded basin catching the flow.",
     longDescription:
-      "A hand-thrown clay pitcher rests at a gentle tilt above a wide terracotta basin, pouring clear water over layered river stones. The unglazed earthenware gives the piece a warm, tactile presence and brings a calm, garden-like cadence to a living room or bedside table.",
+      "Two coconut-shell-style bowls sit at different heights so water can travel from one to the other before settling into the rounded basin below. Decorative greenery and smooth pebbles complete the arrangement, giving the piece a lively, natural look. The result is a compact cascade designed to bring movement and detail to everyday spaces.",
     features: [
-      "Earthy fired terracotta earthen vessel",
-      "Calming stream sound calibration",
-      "Natural river stone sound disperser",
+      "Two coconut-shell-style cascade bowls",
+      "Decorative greenery and smooth pebbles",
+      "Rounded basin with a gentle two-level flow",
     ],
     image: {
-      src: "/images/terracotta-pot.jpg",
-      alt: "Terracotta Pot Water Fountain with a tilted clay pitcher pouring water over river stones and green plants",
+      src: "/images/photograph-pending.png",
+      alt: "Original photograph of the Twin-Bowl Cascade Fountain coming soon",
     },
-    cartImage: "/images/terracotta-detail.jpg",
+    cartImage: "/images/photograph-pending.png",
     gallery: [
       {
-        src: "/images/terracotta-pot.jpg",
-        alt: "Terracotta pitcher fountain in a round clay basin with trailing ferns and stones",
-        label: "Angle 01",
-        caption: "Calming Profile",
-      },
-      {
-        src: "/images/terracotta-detail.jpg",
-        alt: "Close view of the terracotta pitcher spout and wet river stones",
-        label: "Angle 02",
-        caption: "Kolshi Spout Detail",
-      },
-      {
-        src: "/images/triptych-study.jpg",
-        alt: `The three ${BRAND_NAME} fountains arranged together on a warm wooden study desk`,
-        label: "Angle 03",
-        caption: "Studio Trio Context",
+        src: "/images/photograph-pending.png",
+        alt: "Placeholder showing that the original photograph of the Twin-Bowl Cascade Fountain is coming soon",
+        label: "View 01",
+        caption: "Original photograph coming soon",
       },
     ],
     specs: [
-      { label: "Dimensions", value: "22cm × 22cm × 19cm" },
-      { label: "Acoustic Decibel", value: "25 dB (Calming Stream)" },
-      { label: "Material Build", value: "Hand-thrown clay & natural river pebbles" },
-      { label: "Acoustic Pump", value: "Low-voltage silent submersible" },
+      {
+        label: "Specifications",
+        value: "Dimensions, materials, and pump details to be confirmed",
+      },
     ],
-    included: [
-      "Low-voltage submersible pump",
-      "Natural river stone disperser",
-      "Miniature garden planting space",
-    ],
+    included: [],
     care: {
       story:
-        "This fountain honours centuries of Bengal ceramic heritage. Each pitcher is thrown by hand, dried slowly, and fired to a warm terracotta tone before it is paired with a matching basin and a nest of natural river stones. The porous earthenware subtly cools the circulating water and carries an authentic organic aroma.",
+        "The cascade concept starts with two bowl forms stacked at gentle heights, echoing the way water steps down through a natural stream. Greenery and pebbles soften the edges, while the rounded basin gathers the flow into a single, calm pool.",
       storyPoints: [
-        "Hand-thrown pitcher with a curved, traditional spout",
-        "Natural river stones soften the sound of falling water",
-        "Open basin rim leaves room for small green plantings",
+        "Twin bowls create a two-step cascade path",
+        "Greenery and pebbles frame the flowing water",
+        "Rounded basin anchors the composition",
       ],
-      setup:
-        "Place the basin on a level, water-resistant surface. Fill with clean water, submerge the pump, connect the spout line, and plug into a standard outlet. Turn the flow dial slowly until the stream falls cleanly onto the stones.",
-      water:
-        "Filtered or RO water is recommended. Porous terracotta may show a natural mineral patina over time.",
-      rinse:
-        "Wipe the basin with a soft damp cloth and rinse the stones every two weeks. Avoid harsh detergents on the unglazed clay.",
-      note: "Keep the pump submerged during use. Allow the clay to dry fully before storage or moving the fountain.",
+      setup: "",
+      water: "",
+      rinse: "",
+      note: "",
+    },
+  },
+  {
+    slug: "fountain-03",
+    name: "Woodland Tree & Well Fountain",
+    shortName: "Woodland Tree & Well",
+    price: null,
+    catalogNumber: "03",
+    provenance: "Original Design",
+    flowLabel: "Woodland Flow",
+    flowDescription: "Woodland-inspired flow into a stone well",
+    collectionLine: "Original Woodland Design",
+    nativeName: "",
+    description:
+      "A woodland-inspired fountain with a tree-trunk structure, a miniature stone-textured well, an elevated bowl, and decorative root details.",
+    longDescription:
+      "A tree-trunk structure rises beside a miniature stone-textured well, with exposed roots grounding the scene and an elevated bowl carrying the flow overhead. The composition draws on woodland imagery — bark, stone, and roots — rearranged into a compact decorative fountain. It is a detail-rich piece meant to reward a closer look on a desk, shelf, or side table.",
+    features: [
+      "Tree-trunk structure with decorative root details",
+      "Miniature stone-textured well",
+      "Elevated bowl above the woodland scene",
+    ],
+    image: {
+      src: "/images/rustic-well.jpg",
+      alt: "Woodland fountain with a tree-trunk structure and roots beside a miniature stone-textured well with elevated bowls",
+    },
+    cartImage: "/images/rustic-well.jpg",
+    gallery: [
+      {
+        src: "/images/rustic-well.jpg",
+        alt: "Front view of the woodland fountain showing the tree trunk, roots, and stone-textured well",
+        label: "View 01",
+        caption: "Tree and well composition",
+      },
+      {
+        src: "/images/rustic-wellhead.jpg",
+        alt: "Close view of the woodland fountain's tree trunk, elevated bowl, and well rim",
+        label: "View 02",
+        caption: "Trunk and bowl detail",
+      },
+    ],
+    specs: [
+      {
+        label: "Specifications",
+        value: "Dimensions, materials, and pump details to be confirmed",
+      },
+    ],
+    included: [],
+    care: {
+      story:
+        "The woodland design brings together the three textures of a forest floor scene: bark-like trunk surfaces, stone-textured masonry, and spreading roots. An elevated bowl and a miniature well give the water its path, so the piece reads as a small landscape rather than a single object.",
+      storyPoints: [
+        "Tree-trunk column with root details anchors the scene",
+        "Miniature stone well forms the basin",
+        "Elevated bowl adds height and a second water level",
+      ],
+      setup: "",
+      water: "",
+      rinse: "",
+      note: "",
     },
   },
 ];

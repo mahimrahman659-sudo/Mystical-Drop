@@ -17,7 +17,8 @@ export type CartLine = {
 
 export type DetailedCartLine = CartLine & {
   product: CatalogProduct;
-  lineTotal: number;
+  /** `null` while the product has no confirmed price yet. */
+  lineTotal: number | null;
 };
 
 export function normalizeQuantity(value: unknown): number | null {
@@ -120,19 +121,38 @@ export function detailedLines(
   return lines.flatMap((line) => {
     const product = bySlug.get(line.slug);
     if (!product) return [];
+    const unitPrice =
+      typeof product.price === "number" && product.price > 0
+        ? product.price
+        : null;
     return [
       {
         ...line,
         product,
-        lineTotal: product.price * line.quantity,
+        lineTotal: unitPrice === null ? null : unitPrice * line.quantity,
       },
     ];
   });
 }
 
-export function cartTotals(lines: CartLine[], products: CatalogProduct[]) {
+export type CartTotals = {
+  items: DetailedCartLine[];
+  quantity: number;
+  /** `null` when any line is unpriced — never displayed as zero. */
+  subtotal: number | null;
+  shipping: number;
+  /** `null` when any line is unpriced — never displayed as zero. */
+  total: number | null;
+  /** True when the cart holds at least one product without a confirmed price. */
+  hasUnpriced: boolean;
+};
+
+export function cartTotals(lines: CartLine[], products: CatalogProduct[]): CartTotals {
   const items = detailedLines(lines, products);
-  const subtotal = items.reduce((sum, line) => sum + line.lineTotal, 0);
+  const hasUnpriced = items.some((line) => line.lineTotal === null);
+  const subtotal = hasUnpriced
+    ? null
+    : items.reduce<number>((sum, line) => sum + (line.lineTotal ?? 0), 0);
   const quantity = items.reduce((sum, line) => sum + line.quantity, 0);
   const shipping = FREE_SHIPPING.amount;
   return {
@@ -140,7 +160,8 @@ export function cartTotals(lines: CartLine[], products: CatalogProduct[]) {
     quantity,
     subtotal,
     shipping,
-    total: subtotal + shipping,
+    total: subtotal === null ? null : subtotal + shipping,
+    hasUnpriced,
   };
 }
 

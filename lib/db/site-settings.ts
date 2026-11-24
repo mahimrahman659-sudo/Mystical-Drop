@@ -6,8 +6,8 @@ import { getDb } from "@/lib/db/client";
 export const SITE_SETTINGS_COLLECTION = "siteSettings";
 const HOME_BANNER_KEY = "homeBanner";
 
-const DEFAULT_BANNER_IMAGE = "/images/triptych-study.jpg";
-const DEFAULT_BANNER_ALT = `The three ${BRAND_NAME} handcrafted fountains arranged on a warm wooden study desk with plants, notebooks, and a reading lamp`;
+const DEFAULT_BANNER_IMAGE = "/images/rustic-well.jpg";
+const DEFAULT_BANNER_ALT = `Woodland-inspired fountain with a tree-trunk structure and miniature stone-textured well, an original ${BRAND_NAME} design`;
 
 export type SiteBanner = {
   imageSrc: string;

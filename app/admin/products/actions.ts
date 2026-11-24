@@ -33,11 +33,19 @@ const productSchema = z.object({
   collectionLine: z.string().trim().min(2, "Enter the collection line.").max(160),
   flowLabel: z.string().trim().min(2, "Enter a flow label.").max(50),
   flowDescription: z.string().trim().min(2, "Enter the acoustic description.").max(120),
-  price: z.coerce
-    .number()
-    .int("Use a whole BDT amount.")
-    .min(1, "Price must be greater than zero.")
-    .max(10_000_000),
+  price: z.preprocess(
+    (value) => {
+      if (value === "" || value === null || value === undefined) return null;
+      const numeric = Number(value);
+      return Number.isNaN(numeric) ? value : numeric;
+    },
+    z
+      .number()
+      .int("Use a whole BDT amount.")
+      .min(1, "Price must be greater than zero.")
+      .max(10_000_000, "Price must be 10,000,000 BDT or less.")
+      .nullable(),
+  ),
   description: z.string().trim().min(20, "Add a short storefront description.").max(1000),
   longDescription: z.string().trim().min(20, "Add a longer description.").max(3000),
   imageSrc: z.string().trim().min(1, "Choose a main image."),

@@ -187,6 +187,18 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
       );
     }
 
+    if (
+      typeof product.price !== "number" ||
+      !Number.isInteger(product.price) ||
+      product.price < 1
+    ) {
+      throw new OrderError(
+        409,
+        "PRICE_UNAVAILABLE",
+        "One or more fountains in your cart does not have a confirmed price yet. Review your cart before trying again.",
+      );
+    }
+
     const lineTotal = product.price * line.quantity;
     items.push({
       slug: product.slug,
@@ -217,7 +229,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
   const orderId = new ObjectId();
   const accessToken = orderAccessToken(orderId.toHexString(), input.submissionKey);
   const now = new Date();
-  const delivery = fulfillmentEstimate(input.customer.city);
+    const delivery = fulfillmentEstimate();
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const order: OrderDocument = {

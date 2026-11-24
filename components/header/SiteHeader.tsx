@@ -24,7 +24,16 @@ const navItems = [
     label: "Our Fountains",
     match: (pathname: string) => pathname.startsWith("/products"),
   },
-  { href: "/#about", label: "About" },
+  {
+    href: "/innovation",
+    label: "Our Innovation",
+    match: (pathname: string) => pathname.startsWith("/innovation"),
+  },
+  {
+    href: "/about",
+    label: "Our Story",
+    match: (pathname: string) => pathname.startsWith("/about"),
+  },
   { href: "/#contact", label: "Contact" },
 ];
 
@@ -44,12 +53,6 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-outline-variant/20 bg-surface/90 shadow-[0_1px_8px_rgba(41,45,39,0.04)] backdrop-blur-xl">
-      <div className="flex items-center justify-center bg-surface-container-low px-margin-mobile py-1.5 lg:px-margin">
-        <p className="text-center text-label-sm uppercase leading-4 tracking-[0.14em] text-on-surface-variant sm:tracking-widest">
-          Free artisanal delivery nationwide across Bangladesh
-          <span className="hidden sm:inline"> • Gentle trickle acoustic calibration</span>
-        </p>
-      </div>
       <div className="site-container flex h-[68px] items-center justify-between gap-3 sm:h-20">
         <Link
           href="/"
@@ -64,7 +67,7 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav aria-label="Main navigation" className="hidden items-center gap-4 md:flex lg:gap-space-lg">
+        <nav aria-label="Main navigation" className="hidden items-center gap-3 lg:flex lg:gap-space-lg">
           {navItems.map((item) => {
             const active = item.match?.(pathname);
             return (
@@ -140,7 +143,7 @@ export function SiteHeader() {
             aria-label="Open menu"
             aria-haspopup="dialog"
             aria-expanded={menuOpen}
-            className="icon-button md:hidden"
+            className="icon-button lg:hidden"
           >
             <MenuIcon size={22} />
           </button>

@@ -171,9 +171,10 @@ export function ProductForm({
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field
             name="provenance"
-            label="Provenance / material line"
+            label="Style / provenance line"
             defaultValue={v("provenance", initial.provenance)}
             error={errors.provenance}
+            hint="Short style note, e.g. “Original Design”."
           />
           <Field
             name="collectionLine"
@@ -186,14 +187,14 @@ export function ProductForm({
             label="Flow badge"
             defaultValue={v("flowLabel", initial.flowLabel)}
             error={errors.flowLabel}
-            hint="Short label such as “Trickle”."
+            hint="Short label such as “Cascade”."
           />
           <Field
             name="flowDescription"
-            label="Acoustic description"
+            label="Water flow description"
             defaultValue={v("flowDescription", initial.flowDescription)}
             error={errors.flowDescription}
-            hint="Example: 24 dB Gentle Trickle."
+            hint="Example: Gentle pour into a miniature well basin."
           />
           <div className="sm:col-span-2">
             <Field
@@ -219,7 +220,7 @@ export function ProductForm({
             type="number"
             defaultValue={v("price", initial.price)}
             error={errors.price}
-            hint="Whole Taka. The ৳ symbol is rendered by the storefront."
+            hint="Whole Taka, or leave empty until the price is confirmed. Unpriced products are never purchasable."
           />
         </div>
       </div>

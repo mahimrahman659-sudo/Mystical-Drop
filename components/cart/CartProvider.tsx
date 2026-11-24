@@ -40,9 +40,11 @@ type CartContextValue = {
   lines: CartLine[];
   items: DetailedCartLine[];
   quantity: number;
-  subtotal: number;
+  subtotal: number | null;
   shipping: number;
-  total: number;
+  total: number | null;
+  /** True when a cart line has no confirmed price — checkout is blocked. */
+  hasUnpriced: boolean;
   isHydrated: boolean;
   catalogError: string | null;
   toast: CartToastState | null;
@@ -111,6 +113,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = useCallback(
     (slug: string, quantity = 1, options: AddOptions = {}) => {
       const product = bySlug.get(slug);
+      if (product && typeof product.price !== "number") {
+        showToast(
+          "Price coming soon",
+          `${product.shortName} is not yet available for purchase.`,
+        );
+        return;
+      }
       setLines((previous) => {
         const next = addLine(previous, slug, quantity);
         persistCart(next);
@@ -202,6 +211,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       subtotal: totals.subtotal,
       shipping: totals.shipping,
       total: totals.total,
+      hasUnpriced: totals.hasUnpriced,
       isHydrated,
       catalogError,
       toast,

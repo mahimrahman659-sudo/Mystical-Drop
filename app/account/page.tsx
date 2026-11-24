@@ -231,8 +231,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             <SparkleIcon size={18} className="mt-0.5 shrink-0 text-primary" />
             <p className="text-body-sm leading-relaxed text-on-surface-variant">
               These are demo Cash on Delivery orders. No payment has been
-              collected and no dispatch is scheduled. The admin panel and this
-              history are fed by the same MongoDB order records.
+              collected and no dispatch is scheduled.
             </p>
           </div>
         </div>

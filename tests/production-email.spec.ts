@@ -119,19 +119,37 @@ async function startApp(
   return started;
 }
 
+/** Retries transient loopback resets that occur under sustained test load. */
+async function getWithRetry(
+  request: APIRequestContext,
+  url: string,
+  attempts = 3,
+) {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await request.get(url);
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 750));
+    }
+  }
+  throw lastError;
+}
+
 async function deliveryUnavailableChecks(
   browser: Browser,
   request: APIRequestContext,
   target: ProductionApp,
 ): Promise<void> {
-  const delivery = await request.get(`${target.baseUrl}/api/auth-delivery`);
+  const delivery = await getWithRetry(request, `${target.baseUrl}/api/auth-delivery`);
   expect(delivery.ok()).toBe(true);
   await expect(delivery.json()).resolves.toEqual({
     available: false,
     mode: "unavailable",
   });
 
-  const mailbox = await request.get(`${target.baseUrl}/dev/mailbox`);
+  const mailbox = await getWithRetry(request, `${target.baseUrl}/dev/mailbox`);
   expect(mailbox.status()).toBe(404);
 
   const page = await browser.newPage({ baseURL: target.baseUrl });

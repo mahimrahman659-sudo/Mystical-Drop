@@ -105,14 +105,13 @@ export function isFulfillmentStatus(value: string): value is FulfillmentStatus {
   return (FULFILLMENT_STATUSES as readonly string[]).includes(value);
 }
 
-export function fulfillmentEstimate(city: string): {
+export function fulfillmentEstimate(): {
   deliveryEstimate: string;
   deliveryEstimateNote: string;
 } {
-  const isDhaka = /dhaka/i.test(city);
   return {
-    deliveryEstimate: isDhaka ? "24–48 hours" : "3–4 working days",
-    deliveryEstimateNote: isDhaka ? "Dhaka metropolitan" : "Nationwide courier",
+    deliveryEstimate: "Not scheduled",
+    deliveryEstimateNote: "Demo preview — no delivery is arranged",
   };
 }
 

@@ -11,6 +11,7 @@ import {
   registerViaUi,
   registerVerifyAndLogin,
   resetLink,
+  priceTestProducts,
   resetTestDatabase,
   submitDemoOrder,
   verificationLink,
@@ -20,6 +21,7 @@ import {
 
 test.beforeEach(async () => {
   await resetTestDatabase();
+  await priceTestProducts();
 });
 
 const KNOWN_STREAMING_HYDRATION_RACE =
@@ -316,8 +318,8 @@ test("cart survives registration and login, order appears in account and admin",
   const errors = collectHydrationErrors(page);
   await page.goto("/");
   await waitForAppReady(page);
-  await addFromHomepage(page, "Rustic Tree & Stone Well Fountain");
-  await addFromHomepage(page, "Bamboo Cascade Water Fountain");
+  await addFromHomepage(page, "Rustic Miniature Well Fountain");
+  await addFromHomepage(page, "Twin-Bowl Cascade Fountain");
   await page.getByRole("link", { name: "View Cart", exact: true }).click();
   await expect(page.locator("aside").getByText("৳8,050").first()).toBeVisible();
 
@@ -334,8 +336,8 @@ test("cart survives registration and login, order appears in account and admin",
   await expect(page).toHaveURL(/\/login\?verified=1/);
   await loginViaUi(page, "journey.customer@example.com", "JourneyPass123", "/checkout");
   await expect(page.getByLabel(/Full Name/)).toBeVisible();
-  await expect(page.locator("aside").getByText("Rustic Tree & Stone Well").first()).toBeVisible();
-  await expect(page.locator("aside").getByText("Bamboo Cascade").first()).toBeVisible();
+  await expect(page.locator("aside").getByText("Miniature Well").first()).toBeVisible();
+  await expect(page.locator("aside").getByText("Twin-Bowl Cascade").first()).toBeVisible();
   await expect(page.locator("aside").getByText("৳8,050").first()).toBeVisible();
   await expect(
     page.getByText(/This storefront is not connected to a payment or fulfilment service/),
@@ -405,8 +407,8 @@ test("logout preserves cart items and quantities", async ({ page, request }) => 
   await loginViaUi(page, "logout.shopper@example.com", "LogoutPass123");
   await page.goto("/");
   await waitForAppReady(page);
-  await addFromHomepage(page, "Rustic Tree & Stone Well Fountain");
-  await addFromHomepage(page, "Bamboo Cascade Water Fountain");
+  await addFromHomepage(page, "Rustic Miniature Well Fountain");
+  await addFromHomepage(page, "Twin-Bowl Cascade Fountain");
   await page.goto("/account");
   await waitForAppReady(page);
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
@@ -422,7 +424,7 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
   request,
 }) => {
   await page.goto("/");
-  await addFromHomepage(page, "Terracotta Pot Water Fountain");
+  await addFromHomepage(page, "Woodland Tree & Well Fountain");
   await page.getByRole("link", { name: "View Cart", exact: true }).click();
   await page.getByRole("link", { name: "Proceed to Checkout" }).click();
   await fillCheckout(page, {
@@ -492,7 +494,7 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
     ),
   ).toBe(true);
 
-  const price = await getProductPrice("rustic-tree-stone-well");
+  const price = await getProductPrice("fountain-01");
   const key = crypto.randomUUID();
   const body = {
     submissionKey: key,
@@ -505,7 +507,7 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
       postalCode: "1230",
       instructions: "",
     },
-    items: [{ slug: "rustic-tree-stone-well", quantity: 1 }],
+    items: [{ slug: "fountain-01", quantity: 1 }],
     expectedTotal: price,
   };
   const first = await request.post("/api/orders", {
@@ -527,7 +529,7 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
 
   await db
     .collection("products")
-    .updateOne({ slug: "rustic-tree-stone-well" }, { $set: { price: price + 100 } });
+    .updateOne({ slug: "fountain-01" }, { $set: { price: price + 100 } });
   const retryAfterPriceChange = await request.post("/api/orders", {
     headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! },
     data: body,
@@ -538,12 +540,12 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
   };
   expect(retriedOrder.order.id).toBe(firstOrder.order.id);
 
-  const bambooPrice = await getProductPrice("bamboo-cascade");
+  const bambooPrice = await getProductPrice("fountain-02");
   const mismatchedCart = await request.post("/api/orders", {
     headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! },
     data: {
       ...body,
-      items: [{ slug: "bamboo-cascade", quantity: 1 }],
+      items: [{ slug: "fountain-02", quantity: 1 }],
       expectedTotal: bambooPrice,
     },
   });
@@ -556,7 +558,7 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
   const concurrentBody = {
     ...body,
     submissionKey: concurrentKey,
-    items: [{ slug: "bamboo-cascade", quantity: 1 }],
+    items: [{ slug: "fountain-02", quantity: 1 }],
     expectedTotal: bambooPrice,
   };
   const [concurrentFirst, concurrentSecond] = await Promise.all([
@@ -602,7 +604,7 @@ test("one customer cannot read another customer's order", async ({
   });
 
   await loginViaUi(page, "owner@example.com", "OwnerPass123");
-  const price = await getProductPrice("bamboo-cascade");
+  const price = await getProductPrice("fountain-02");
   const orderResponse = await page.request.post("/api/orders", {
     headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! },
     data: {
@@ -616,7 +618,7 @@ test("one customer cannot read another customer's order", async ({
         postalCode: "1212",
         instructions: "",
       },
-      items: [{ slug: "bamboo-cascade", quantity: 1 }],
+      items: [{ slug: "fountain-02", quantity: 1 }],
       expectedTotal: price,
     },
   });
@@ -658,7 +660,7 @@ test("fresh-context page loads have no application hydration errors", async ({
   test.slow();
   const routes = [
     "/",
-    "/products/rustic-tree-stone-well",
+    "/products/fountain-01",
     "/cart",
     "/checkout",
     "/order-confirmation",
@@ -692,7 +694,8 @@ test("fresh-context page loads have no application hydration errors", async ({
         errors.push(error.message);
       }
     });
-    await page.goto(route, { waitUntil: "networkidle", timeout: 120_000 });
+    await page.goto(route, { waitUntil: "load", timeout: 120_000 });
+    await waitForAppReady(page);
     await page.waitForTimeout(500);
     expect(errors, `${route}: ${errors.join("\n")}`).toEqual([]);
     await context.close();

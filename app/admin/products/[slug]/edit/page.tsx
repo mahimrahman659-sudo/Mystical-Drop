@@ -60,7 +60,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
             collectionLine: product.collectionLine,
             flowLabel: product.flowLabel,
             flowDescription: product.flowDescription,
-            price: String(product.price),
+            price: product.price === null ? "" : String(product.price),
             description: product.description,
             longDescription: product.longDescription,
             imageSrc: product.image.src,

@@ -3,30 +3,32 @@ import {
   addFromHomepage,
   fillCheckout,
   getTestDb,
+  priceTestProducts,
   resetTestDatabase,
   waitForAppReady,
 } from "./helpers";
 
 test.beforeEach(async () => {
   await resetTestDatabase();
+  await priceTestProducts();
 });
 
 test("cart quantities, removal, clearing, and invalid stored data", async ({ page }) => {
   await page.goto("/");
   await waitForAppReady(page);
-  await addFromHomepage(page, "Rustic Tree & Stone Well Fountain");
-  await addFromHomepage(page, "Bamboo Cascade Water Fountain");
+  await addFromHomepage(page, "Rustic Miniature Well Fountain");
+  await addFromHomepage(page, "Twin-Bowl Cascade Fountain");
   await page.goto("/cart");
   await waitForAppReady(page);
   await expect(page.getByText("(2 items)")).toBeVisible();
 
   const bambooLine = () =>
     page.locator("main li").filter({
-      has: page.getByRole("heading", { name: "Bamboo Cascade", exact: true }),
+      has: page.getByRole("heading", { name: "Twin-Bowl Cascade", exact: true }),
     });
 
   await bambooLine()
-    .getByRole("group", { name: /Quantity for Bamboo Cascade Water Fountain/ })
+    .getByRole("group", { name: /Quantity for Twin-Bowl Cascade Fountain/ })
     .getByRole("button", { name: "Increase quantity" })
     .click();
   await expect(page.getByText("(3 items)")).toBeVisible();
@@ -37,13 +39,13 @@ test("cart quantities, removal, clearing, and invalid stored data", async ({ pag
   await expect(page.getByText("(3 items)")).toBeVisible();
 
   await bambooLine()
-    .getByRole("group", { name: /Quantity for Bamboo Cascade Water Fountain/ })
+    .getByRole("group", { name: /Quantity for Twin-Bowl Cascade Fountain/ })
     .getByRole("button", { name: "Decrease quantity" })
     .click();
   await expect(page.getByText("(2 items)")).toBeVisible();
 
   await page.getByRole("button", {
-    name: "Remove Rustic Tree & Stone Well Fountain from cart",
+    name: "Remove Rustic Miniature Well Fountain from cart",
   }).click();
   await expect(page.getByText("(1 item)")).toBeVisible();
   await expect(page.locator("aside").getByText("৳3,850").first()).toBeVisible();
@@ -56,11 +58,11 @@ test("cart quantities, removal, clearing, and invalid stored data", async ({ pag
     localStorage.setItem(
       "terranova-cart-v1",
       JSON.stringify([
-        { slug: "rustic-tree-stone-well", quantity: 0 },
-        { slug: "bamboo-cascade", quantity: -1 },
-        { slug: "terracotta-pot", quantity: 1.5 },
+        { slug: "fountain-01", quantity: 0 },
+        { slug: "fountain-02", quantity: -1 },
+        { slug: "fountain-03", quantity: 1.5 },
         { slug: "unknown-product", quantity: 2 },
-        { slug: "rustic-tree-stone-well", quantity: 2 },
+        { slug: "fountain-01", quantity: 2 },
       ]),
     );
   });
@@ -68,9 +70,9 @@ test("cart quantities, removal, clearing, and invalid stored data", async ({ pag
   await waitForAppReady(page);
   await expect(page.getByText("(3 items)")).toBeVisible();
   await expect(page.locator("aside").getByText("৳11,850").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Bamboo Cascade", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Rustic Tree & Stone Well", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Terracotta Pot", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Twin-Bowl Cascade", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Miniature Well", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Woodland Tree & Well", exact: true })).toBeVisible();
 });
 
 test("catalog outage preserves the cart and recovers without data loss", async ({
@@ -78,7 +80,7 @@ test("catalog outage preserves the cart and recovers without data loss", async (
 }) => {
   await page.goto("/");
   await waitForAppReady(page);
-  await addFromHomepage(page, "Rustic Tree & Stone Well Fountain");
+  await addFromHomepage(page, "Rustic Miniature Well Fountain");
   await page.route("**/api/catalog", (route) =>
     route.fulfill({
       status: 503,
@@ -93,12 +95,12 @@ test("catalog outage preserves the cart and recovers without data loss", async (
   const stored = await page.evaluate(() =>
     JSON.parse(localStorage.getItem("terranova-cart-v1") ?? "[]"),
   );
-  expect(stored).toEqual([{ slug: "rustic-tree-stone-well", quantity: 1 }]);
+  expect(stored).toEqual([{ slug: "fountain-01", quantity: 1 }]);
 
   await page.unroute("**/api/catalog");
   await page.getByRole("button", { name: "Try again" }).click();
   await expect(
-    page.getByRole("heading", { name: "Rustic Tree & Stone Well", exact: true }),
+    page.getByRole("heading", { name: "Miniature Well", exact: true }),
   ).toBeVisible();
   await expect(page.locator("aside").getByText("৳4,200").first()).toBeVisible();
 });
@@ -106,14 +108,14 @@ test("catalog outage preserves the cart and recovers without data loss", async (
 test("archived cart items are surfaced and can be removed", async ({ page }) => {
   await page.goto("/");
   await waitForAppReady(page);
-  await addFromHomepage(page, "Rustic Tree & Stone Well Fountain");
-  await addFromHomepage(page, "Bamboo Cascade Water Fountain");
+  await addFromHomepage(page, "Rustic Miniature Well Fountain");
+  await addFromHomepage(page, "Twin-Bowl Cascade Fountain");
 
   const db = await getTestDb();
   await db
     .collection("products")
     .updateOne(
-      { slug: "rustic-tree-stone-well" },
+      { slug: "fountain-01" },
       { $set: { status: "archived" } },
     );
 
@@ -123,7 +125,7 @@ test("archived cart items are surfaced and can be removed", async ({ page }) => 
     page.getByText(/1 saved fountain is no longer available/i),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Rustic Tree & Stone Well", exact: true }),
+    page.getByRole("heading", { name: "Miniature Well", exact: true }),
   ).toHaveCount(0);
   await expect(page.locator("aside").getByText("৳3,850").first()).toBeVisible();
 
@@ -134,7 +136,7 @@ test("archived cart items are surfaced and can be removed", async ({ page }) => 
   const stored = await page.evaluate(() =>
     JSON.parse(localStorage.getItem("terranova-cart-v1") ?? "[]"),
   );
-  expect(stored).toEqual([{ slug: "bamboo-cascade", quantity: 1 }]);
+  expect(stored).toEqual([{ slug: "fountain-02", quantity: 1 }]);
 });
 
 test("a rejected price change refreshes the checkout total and keeps the cart", async ({
@@ -143,7 +145,7 @@ test("a rejected price change refreshes the checkout total and keeps the cart", 
   test.slow();
   await page.goto("/");
   await waitForAppReady(page);
-  await addFromHomepage(page, "Rustic Tree & Stone Well Fountain");
+  await addFromHomepage(page, "Rustic Miniature Well Fountain");
   await page.getByRole("link", { name: "View Cart", exact: true }).click();
   await page.getByRole("link", { name: "Proceed to Checkout" }).click();
   await waitForAppReady(page);
@@ -158,7 +160,7 @@ test("a rejected price change refreshes the checkout total and keeps the cart", 
   await db
     .collection("products")
     .updateOne(
-      { slug: "rustic-tree-stone-well" },
+      { slug: "fountain-01" },
       { $set: { price: 5000 } },
     );
 
@@ -171,7 +173,7 @@ test("a rejected price change refreshes the checkout total and keeps the cart", 
   ).toBeVisible({ timeout: 15_000 });
   expect(await db.collection("orders").countDocuments()).toBe(0);
   await expect(
-    page.locator("aside").getByText("Rustic Tree & Stone Well").first(),
+    page.locator("aside").getByText("Miniature Well").first(),
   ).toBeVisible();
 });
 
@@ -179,7 +181,7 @@ test("an interrupted checkout response is idempotent after reload", async ({ pag
   test.slow();
   await page.goto("/");
   await waitForAppReady(page);
-  await addFromHomepage(page, "Rustic Tree & Stone Well Fountain");
+  await addFromHomepage(page, "Rustic Miniature Well Fountain");
   await page.getByRole("link", { name: "View Cart", exact: true }).click();
   await page.getByRole("link", { name: "Proceed to Checkout" }).click();
   await waitForAppReady(page);
@@ -232,7 +234,7 @@ test("two tabs submit the first checkout attempt simultaneously", async ({
     const firstPage = await context.newPage();
     await firstPage.goto("/");
     await waitForAppReady(firstPage);
-    await addFromHomepage(firstPage, "Rustic Tree & Stone Well Fountain");
+    await addFromHomepage(firstPage, "Rustic Miniature Well Fountain");
     expect(
       await firstPage.evaluate(() =>
         localStorage.getItem("terranova-checkout-attempts-v1"),
@@ -332,7 +334,7 @@ test("a genuinely new purchase creates a second order", async ({ page }) => {
 
   await page.goto("/");
   await waitForAppReady(page);
-  await addFromHomepage(page, "Rustic Tree & Stone Well Fountain");
+  await addFromHomepage(page, "Rustic Miniature Well Fountain");
   await page.getByRole("link", { name: "View Cart", exact: true }).click();
   await page.getByRole("link", { name: "Proceed to Checkout" }).click();
   await waitForAppReady(page);
@@ -342,7 +344,7 @@ test("a genuinely new purchase creates a second order", async ({ page }) => {
 
   await page.getByRole("link", { name: "Continue Shopping" }).click();
   await waitForAppReady(page);
-  await addFromHomepage(page, "Bamboo Cascade Water Fountain");
+  await addFromHomepage(page, "Twin-Bowl Cascade Fountain");
   await page.getByRole("link", { name: "View Cart", exact: true }).click();
   await page.getByRole("link", { name: "Proceed to Checkout" }).click();
   await waitForAppReady(page);
@@ -362,8 +364,8 @@ test("a genuinely new purchase creates a second order", async ({ page }) => {
 test("Instant Buy preserves existing cart items and selected quantity", async ({ page }) => {
   await page.goto("/");
   await waitForAppReady(page);
-  await addFromHomepage(page, "Bamboo Cascade Water Fountain");
-  await page.goto("/products/rustic-tree-stone-well");
+  await addFromHomepage(page, "Twin-Bowl Cascade Fountain");
+  await page.goto("/products/fountain-01");
   await waitForAppReady(page);
 
   const quantity = page.getByRole("group", { name: "Quantity" });
@@ -375,8 +377,8 @@ test("Instant Buy preserves existing cart items and selected quantity", async ({
   await page.waitForURL("**/checkout");
   await waitForAppReady(page);
   const summary = page.locator("aside");
-  await expect(summary.getByText("Rustic Tree & Stone Well").first()).toBeVisible();
-  await expect(summary.getByText("Bamboo Cascade").first()).toBeVisible();
+  await expect(summary.getByText("Miniature Well").first()).toBeVisible();
+  await expect(summary.getByText("Twin-Bowl Cascade").first()).toBeVisible();
   await expect(summary.getByText("3x")).toBeVisible();
   await expect(summary.getByText("1x")).toBeVisible();
   await expect(summary.getByText("৳16,450").first()).toBeVisible();

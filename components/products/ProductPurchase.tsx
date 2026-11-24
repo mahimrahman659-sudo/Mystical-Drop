@@ -9,7 +9,9 @@ import {
   ArrowRightIcon,
   BagIcon,
   CheckCircleIcon,
+  InfoIcon,
 } from "@/components/ui/icons";
+import { isPriced } from "@/lib/format";
 import type { Product } from "@/lib/products";
 
 export function ProductPurchase({ product }: { product: Product }) {
@@ -19,6 +21,7 @@ export function ProductPurchase({ product }: { product: Product }) {
   const [addedQuantity, setAddedQuantity] = useState<number | null>(null);
   const buyingRef = useRef(false);
   const [isBuying, setIsBuying] = useState(false);
+  const purchasable = isPriced(product.price);
 
   function updateQuantity(next: number) {
     setQuantity(Math.min(10, Math.max(1, next)));
@@ -26,16 +29,50 @@ export function ProductPurchase({ product }: { product: Product }) {
   }
 
   function handleAddToCart() {
+    if (!purchasable) return;
     addItem(product.slug, quantity, { announce: false });
     setAddedQuantity(quantity);
   }
 
   function handleInstantBuy() {
-    if (buyingRef.current) return;
+    if (!purchasable || buyingRef.current) return;
     buyingRef.current = true;
     setIsBuying(true);
     addItem(product.slug, quantity, { announce: false });
     router.push("/checkout");
+  }
+
+  if (!purchasable) {
+    return (
+      <div
+        role="status"
+        className="flex flex-col gap-space-sm rounded-xl border border-on-surface/[0.06] bg-surface-container-low p-space-md"
+      >
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 text-secondary">
+            <InfoIcon size={20} />
+          </span>
+          <div className="flex flex-col gap-1">
+            <span className="text-label-md font-semibold uppercase tracking-wider text-on-surface">
+              Price Coming Soon
+            </span>
+            <p className="text-body-sm leading-relaxed text-on-surface-variant">
+              This fountain is not yet available for purchase. Pricing will be
+              announced when it is confirmed — follow the collection to know
+              when ordering opens.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2.5 pt-1">
+          <Link href="/#collection" className="btn btn-outline px-4 py-2.5">
+            Explore the collection
+          </Link>
+          <Link href="/#contact" className="btn btn-soft px-4 py-2.5">
+            Contact us
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -45,9 +82,6 @@ export function ProductPurchase({ product }: { product: Product }) {
           Quantity
         </span>
         <QuantityStepper value={quantity} onChange={updateQuantity} />
-        <span className="text-body-sm text-on-surface-variant">
-          Made to order in small batches
-        </span>
       </div>
 
       <div className="grid grid-cols-1 gap-space-sm pt-space-xs sm:grid-cols-2">

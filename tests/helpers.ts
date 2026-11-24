@@ -224,7 +224,32 @@ export async function getProductPrice(slug: string): Promise<number> {
   const db = await getTestDb();
   const product = await db.collection("products").findOne({ slug });
   if (!product) throw new Error(`Product ${slug} not found.`);
-  return product.price as number;
+  if (typeof product.price !== "number") {
+    throw new Error(
+      `Product ${slug} is unpriced. Call priceTestProducts() first — seeded products ship unpriced.`,
+    );
+  }
+  return product.price;
+}
+
+/**
+ * Test prices for the three seeded products. Production seeds these as
+ * unpriced; commerce tests opt in to priced catalogues explicitly.
+ * Values mirror the historical test catalogue so totals stay comparable.
+ */
+export const TEST_PRODUCT_PRICES: Record<string, number> = {
+  "fountain-01": 4200,
+  "fountain-02": 3850,
+  "fountain-03": 3450,
+};
+
+export async function priceTestProducts(
+  prices: Record<string, number> = TEST_PRODUCT_PRICES,
+): Promise<void> {
+  const db = await getTestDb();
+  for (const [slug, price] of Object.entries(prices)) {
+    await db.collection("products").updateOne({ slug }, { $set: { price } });
+  }
 }
 
 export async function seedCart(
@@ -313,7 +338,12 @@ export async function createGuestOrderViaApi(
   const subtotal = items.reduce((sum, line) => {
     const product = docs.find((doc) => doc.slug === line.slug);
     if (!product) throw new Error(`Missing product ${line.slug}`);
-    return sum + (product.price as number) * line.quantity;
+    if (typeof product.price !== "number") {
+      throw new Error(
+        `Product ${line.slug} is unpriced. Call priceTestProducts() before ordering.`,
+      );
+    }
+    return sum + product.price * line.quantity;
   }, 0);
 
   const response = await request.post("/api/orders", {
