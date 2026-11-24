@@ -15,6 +15,21 @@ export type CatalogProduct = Product & {
   status: ProductStatus;
 };
 
+/**
+ * A product can only be purchased when it is published (active) and has a
+ * confirmed, valid price. Missing prices are never treated as zero.
+ */
+export function isPurchasable(
+  product: Pick<Product, "price"> & { status?: ProductStatus },
+): boolean {
+  return (
+    (product.status ?? "active") === "active" &&
+    typeof product.price === "number" &&
+    Number.isInteger(product.price) &&
+    product.price > 0
+  );
+}
+
 export function toCatalogProduct(product: StoredProduct): CatalogProduct {
   return {
     slug: product.slug,

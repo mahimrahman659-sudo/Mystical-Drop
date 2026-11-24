@@ -6,14 +6,15 @@ import { ProductGallery } from "@/components/products/ProductGallery";
 import { ProductPurchase } from "@/components/products/ProductPurchase";
 import { RelatedProductCard } from "@/components/products/RelatedProductCard";
 import {
-  DropletIcon,
+  InfoIcon,
   LeafIcon,
-  ShieldIcon,
+  PhoneIcon,
   SparkleIcon,
   TruckIcon,
 } from "@/components/ui/icons";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, isPriced } from "@/lib/format";
 import { getActiveProducts, getProductBySlug } from "@/lib/db/products";
+import { DRAFT_NAME_SLUGS } from "@/lib/products";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -37,9 +38,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product) notFound();
 
   const archived = product.status === "archived";
+  const purchasable = !archived && isPriced(product.price);
+  const draftName = DRAFT_NAME_SLUGS.has(product.slug);
   const related = (await getActiveProducts()).filter(
     (candidate) => candidate.slug !== product.slug,
   );
+  const care = product.care;
 
   return (
     <div>
@@ -53,7 +57,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               /
             </span>
             <Link href="/#collection" className="transition-colors hover:text-primary">
-              Fountains
+              Our Fountains
             </Link>
             <span aria-hidden="true" className="opacity-40">
               /
@@ -63,7 +67,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="flex items-center gap-2 self-start text-secondary sm:self-auto">
             <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-secondary" />
             <span className="text-label-sm uppercase tracking-wider">
-              Hand-finished in Savar • Limited batch
+              Original design • Made in-house
             </span>
           </div>
         </div>
@@ -83,16 +87,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     className={`rounded px-2 py-0.5 text-label-sm font-semibold uppercase tracking-wider ${
                       archived
                         ? "bg-surface-container-high text-on-surface-variant"
-                        : "bg-secondary-container text-on-secondary-container"
+                        : purchasable
+                          ? "bg-secondary-container text-on-secondary-container"
+                          : "bg-primary-fixed text-primary"
                     }`}
                   >
                     {archived
                       ? "Archived • Not orderable"
-                      : "Made to Order • Small Batch"}
+                      : purchasable
+                        ? "Available to order"
+                        : "Coming Soon"}
                   </span>
                   <span className="text-label-sm text-on-surface-variant">
                     Edition {product.catalogNumber}
                   </span>
+                  {draftName ? (
+                    <span
+                      className="rounded border border-outline-variant/70 px-2 py-0.5 text-label-sm uppercase tracking-wider text-on-surface-variant"
+                      title="This name is a working draft and has not been finally approved."
+                    >
+                      Draft name
+                    </span>
+                  ) : null}
                 </div>
                 {!archived ? (
                   <FavoriteButton
@@ -106,16 +122,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <h1 className="pt-1 font-display text-headline-lg leading-tight tracking-tight text-on-surface">
                 {product.name}
               </h1>
-              <p lang="bn" className="native-name italic">
-                {product.nativeName}
-              </p>
+              {product.nativeName ? (
+                <p lang="bn" className="native-name italic">
+                  {product.nativeName}
+                </p>
+              ) : null}
               <div className="flex flex-wrap items-baseline gap-3 pt-space-xs">
-                <span className="price text-[2.1rem] leading-none text-on-surface sm:text-display-md">
-                  {formatPrice(product.price)}
-                </span>
-                <span className="text-label-md text-on-surface-variant">
-                  (All local VAT & taxes included)
-                </span>
+                {isPriced(product.price) ? (
+                  <>
+                    <span className="price text-[2.1rem] leading-none text-on-surface sm:text-display-md">
+                      {formatPrice(product.price)}
+                    </span>
+                    <span className="text-label-md text-on-surface-variant">
+                      Price in Bangladeshi Taka
+                    </span>
+                  </>
+                ) : (
+                  <span className="font-display text-[1.7rem] leading-none text-on-surface-variant sm:text-headline-lg">
+                    Price Coming Soon
+                  </span>
+                )}
               </div>
             </div>
 
@@ -123,7 +149,25 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {product.longDescription}
             </p>
 
-            <dl className="grid grid-cols-1 gap-space-sm rounded-xl bg-surface-container-low p-space-md sm:grid-cols-2">
+            <ul className="flex flex-col gap-space-xs rounded-xl bg-surface-container-low p-space-md">
+              <li className="text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant">
+                Distinctive details
+              </li>
+              {product.features.map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-start gap-2 text-body-sm leading-relaxed text-on-surface"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-secondary"
+                  />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+
+            <dl className="grid grid-cols-1 gap-space-sm rounded-xl border border-on-surface/[0.05] bg-surface-container-lowest p-space-md sm:grid-cols-2">
               {product.specs.map((spec) => (
                 <div key={spec.label} className="flex min-w-0 flex-col">
                   <dt className="text-label-sm uppercase tracking-wider text-on-surface-variant">
@@ -142,8 +186,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   Archived edition
                 </p>
                 <p className="mt-1 text-body-md leading-relaxed text-on-surface-variant">
-                  This fountain is no longer available for new orders. Browse the
-                  current collection or contact the studio about an existing order.
+                  This fountain is not available for new orders. Browse the
+                  current collection or contact us about an existing order.
                 </p>
                 <Link href="/#collection" className="btn btn-outline mt-3">
                   Browse the collection
@@ -163,37 +207,41 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     Free nationwide delivery
                   </span>
                   <span className="text-body-sm leading-relaxed text-on-surface-variant">
-                    Complimentary insured courier delivery across Bangladesh.
-                    Dhaka orders typically arrive within 24–48 hours; other
-                    divisions in 3–4 working days.
+                    Delivery across Bangladesh is included at no extra cost when
+                    ordering opens.
                   </span>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 text-secondary">
-                  <ShieldIcon size={21} />
+                  <LeafIcon size={21} />
                 </span>
                 <div className="flex flex-col">
                   <span className="text-body-sm font-semibold text-on-surface">
-                    48-Hour In-Home Acoustic Testing Guarantee
+                    Original design, made by our team
                   </span>
                   <span className="text-body-sm leading-relaxed text-on-surface-variant">
-                    Every unit undergoes acoustic testing in our atelier before
-                    packaging. Enjoy a relaxed 48-hour acoustic return guarantee.
+                    This piece is part of our own original collection — designed
+                    and produced in-house by Mystical Drop.
                   </span>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 text-tertiary">
-                  <DropletIcon size={21} />
+                  <PhoneIcon size={21} />
                 </span>
                 <div className="flex flex-col">
                   <span className="text-body-sm font-semibold text-on-surface">
-                    1-Year Silent Pump Warranty
+                    Questions before ordering?
                   </span>
                   <span className="text-body-sm leading-relaxed text-on-surface-variant">
-                    Complimentary motor replacement for electronic pump components
-                    throughout Bangladesh.
+                    <Link
+                      href="/#contact"
+                      className="font-medium text-primary underline underline-offset-2"
+                    >
+                      Contact us
+                    </Link>{" "}
+                    — we are happy to share details, photographs, and updates.
                   </span>
                 </div>
               </div>
@@ -202,102 +250,110 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </section>
 
-      <section className="site-container py-space-lg" aria-labelledby="care-heading">
-        <div className="rounded-2xl border border-on-surface/[0.05] bg-surface-container-lowest p-space-md shadow-sm sm:p-space-lg lg:p-space-xl">
-          <div className="flex flex-col items-baseline justify-between gap-2 pb-space-md sm:flex-row">
+      {care?.story ? (
+        <section
+          className="site-container py-space-lg"
+          aria-labelledby="design-notes-heading"
+        >
+          <div className="rounded-2xl border border-on-surface/[0.05] bg-surface-container-lowest p-space-md shadow-sm sm:p-space-lg lg:p-space-xl">
+            <div className="flex flex-col items-baseline justify-between gap-2 pb-space-md sm:flex-row">
+              <div>
+                <span className="eyebrow text-primary">Design Notes</span>
+                <h2
+                  id="design-notes-heading"
+                  className="mt-1 font-display text-headline-md tracking-tight text-on-surface"
+                >
+                  Inspiration & Craftsmanship
+                </h2>
+              </div>
+              <p className="text-label-sm text-on-surface-variant">
+                Full specifications to be published soon
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-space-lg pt-space-xs md:grid-cols-2">
+              <div className="flex flex-col gap-space-sm rounded-xl bg-surface-container-low p-space-md sm:p-space-lg">
+                <div className="flex items-center gap-2 text-label-md font-semibold uppercase tracking-wider text-primary">
+                  <SparkleIcon size={19} />
+                  <h3>Design inspiration</h3>
+                </div>
+                <p className="text-body-md leading-relaxed text-on-surface-variant">
+                  {care.story}
+                </p>
+                {care.storyPoints.length > 0 ? (
+                  <ul className="space-y-space-xs pt-space-xs text-body-sm text-on-surface">
+                    {care.storyPoints.map((point) => (
+                      <li key={point} className="flex items-start gap-2">
+                        <span
+                          aria-hidden="true"
+                          className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                        />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+
+              <div className="flex flex-col gap-space-sm rounded-xl bg-surface-container-low p-space-md sm:p-space-lg">
+                <div className="flex items-center gap-2 text-label-md font-semibold uppercase tracking-wider text-secondary">
+                  <InfoIcon size={19} />
+                  <h3>Specifications & care</h3>
+                </div>
+                <p className="text-body-md leading-relaxed text-on-surface-variant">
+                  Dimensions, materials, pump details, and a full care guide will
+                  be published here once they are confirmed. We would rather
+                  share verified information than guesswork.
+                </p>
+                <div className="rounded-lg bg-surface p-3">
+                  <span className="block text-label-sm font-semibold uppercase tracking-wider text-on-surface">
+                    Care guide
+                  </span>
+                  <span className="mt-1 block text-body-sm text-on-surface-variant">
+                    Coming with the final specifications.
+                  </span>
+                </div>
+                <p className="pt-1 text-label-sm italic leading-relaxed text-on-surface-variant">
+                  Looking for details now?{" "}
+                  <Link
+                    href="/#contact"
+                    className="font-medium not-italic text-primary underline underline-offset-2"
+                  >
+                    Contact us
+                  </Link>{" "}
+                  and we will share what we can.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {related.length > 0 ? (
+        <section
+          className="site-container pb-space-xl pt-space-lg"
+          aria-labelledby="related-heading"
+        >
+          <div className="mb-space-md flex flex-col items-baseline justify-between gap-2 md:flex-row">
             <div>
-              <span className="eyebrow text-primary">Origins & Assembly</span>
+              <span className="eyebrow text-primary">The Collection</span>
               <h2
-                id="care-heading"
-                className="mt-1 font-display text-headline-md tracking-tight text-on-surface"
+                id="related-heading"
+                className="mt-1 font-display text-headline-lg tracking-tight text-on-surface"
               >
-                Artisan Narrative & Maintenance
+                More Original Fountains
               </h2>
             </div>
-            <p className="text-label-sm text-on-surface-variant">
-              Designed for decades of quiet resonance
+            <p className="text-body-sm text-on-surface-variant">
+              Explore the rest of our original designs
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-space-lg pt-space-xs md:grid-cols-2">
-            <div className="flex flex-col gap-space-sm rounded-xl bg-surface-container-low p-space-md sm:p-space-lg">
-              <div className="flex items-center gap-2 text-label-md font-semibold uppercase tracking-wider text-primary">
-                <SparkleIcon size={19} />
-                <h3>1. Story & Organic Craftsmanship</h3>
-              </div>
-              <p className="text-body-md leading-relaxed text-on-surface-variant">
-                {product.care.story}
-              </p>
-              <ul className="space-y-space-xs pt-space-xs text-body-sm text-on-surface">
-                {product.care.storyPoints.map((point) => (
-                  <li key={point} className="flex items-start gap-2">
-                    <span
-                      aria-hidden="true"
-                      className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
-                    />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="flex flex-col gap-space-sm rounded-xl bg-surface-container-low p-space-md sm:p-space-lg">
-              <div className="flex items-center gap-2 text-label-md font-semibold uppercase tracking-wider text-secondary">
-                <LeafIcon size={19} />
-                <h3>2. Quick Setup &amp; Bi-Weekly Care</h3>
-              </div>
-              <p className="text-body-md leading-relaxed text-on-surface-variant">
-                {product.care.setup}
-              </p>
-              <div className="grid grid-cols-1 gap-space-sm pt-space-xs sm:grid-cols-2">
-                <div className="rounded-lg bg-surface p-3">
-                  <span className="block text-label-sm font-semibold uppercase tracking-wider text-on-surface">
-                    Water Type
-                  </span>
-                  <span className="mt-1 block text-body-sm text-on-surface-variant">
-                    {product.care.water}
-                  </span>
-                </div>
-                <div className="rounded-lg bg-surface p-3">
-                  <span className="block text-label-sm font-semibold uppercase tracking-wider text-on-surface">
-                    Rinse Cycle
-                  </span>
-                  <span className="mt-1 block text-body-sm text-on-surface-variant">
-                    {product.care.rinse}
-                  </span>
-                </div>
-              </div>
-              <p className="pt-1 text-label-sm italic leading-relaxed text-on-surface-variant">
-                * {product.care.note}
-              </p>
-            </div>
+          <div className="grid grid-cols-1 gap-gutter md:grid-cols-2 lg:gap-space-lg">
+            {related.map((relatedProduct) => (
+              <RelatedProductCard key={relatedProduct.slug} product={relatedProduct} />
+            ))}
           </div>
-        </div>
-      </section>
-
-      <section
-        className="site-container pb-space-xl pt-space-lg"
-        aria-labelledby="related-heading"
-      >
-        <div className="mb-space-md flex flex-col items-baseline justify-between gap-2 md:flex-row">
-          <div>
-            <span className="eyebrow text-primary">Limited Catalog</span>
-            <h2
-              id="related-heading"
-              className="mt-1 font-display text-headline-lg tracking-tight text-on-surface"
-            >
-              Other Handcrafted Fountains
-            </h2>
-          </div>
-          <p className="text-body-sm text-on-surface-variant">
-            Complete the 3-piece artisanal indoor collection
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-gutter md:grid-cols-2 lg:gap-space-lg">
-          {related.map((relatedProduct) => (
-            <RelatedProductCard key={relatedProduct.slug} product={relatedProduct} />
-          ))}
-        </div>
-      </section>
+        </section>
+      ) : null}
     </div>
   );
 }

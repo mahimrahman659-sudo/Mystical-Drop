@@ -35,7 +35,6 @@ import {
   type CheckoutField,
   type CheckoutValues,
 } from "@/lib/checkout";
-import { BRAND_NAME } from "@/lib/brand";
 import { FREE_SHIPPING } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 
@@ -147,6 +146,7 @@ export function CheckoutView() {
     quantity,
     subtotal,
     total,
+    hasUnpriced,
     isHydrated,
     catalogError,
     unavailableLines,
@@ -202,6 +202,12 @@ export function CheckoutView() {
     if (submittingRef.current) return;
     if (items.length === 0) {
       setSubmitError("Your cart is empty. Return to the collection before checking out.");
+      return;
+    }
+    if (hasUnpriced || typeof total !== "number") {
+      setSubmitError(
+        "One or more fountains in your cart does not have a confirmed price yet. Review your cart — checkout opens when every price is announced.",
+      );
       return;
     }
 
@@ -490,7 +496,7 @@ export function CheckoutView() {
                       id="email-hint"
                       className="mt-1 text-label-sm text-on-surface-variant"
                     >
-                      For the digital warranty card and care guide.
+                      For order records about this demo order.
                     </p>
                   ) : null}
                   <FieldError field="email" errors={errors} />
@@ -833,12 +839,6 @@ export function CheckoutView() {
                       {FREE_SHIPPING.valueLabel}
                     </span>
                   </div>
-                  <div className="flex justify-between gap-3 text-on-surface-variant">
-                    <span>Cash-on-delivery processing</span>
-                    <span className="font-medium uppercase text-secondary">
-                      Included
-                    </span>
-                  </div>
                 </div>
 
                 <div className="mt-space-sm flex flex-wrap items-baseline justify-between gap-2 rounded-lg bg-surface-container-low p-space-md">
@@ -847,7 +847,7 @@ export function CheckoutView() {
                       Total payable
                     </p>
                     <p className="text-label-sm text-secondary">
-                      Inclusive of all local taxes
+                      Prices in Bangladeshi Taka
                     </p>
                   </div>
                   <span className="price text-display-md font-semibold leading-none text-primary">
@@ -867,18 +867,18 @@ export function CheckoutView() {
 
                 <div className="mt-space-md flex flex-col gap-3">
                   <p className="text-label-sm uppercase tracking-wider text-on-surface-variant">
-                    {BRAND_NAME} craft pledges
+                    Good to know
                   </p>
                   {[
                     {
                       icon: <WavesMini />,
-                      title: "48h pre-dispatch acoustic inspection",
-                      body: "Every pump and basin is run in the studio to test motor silence and droplet cadence.",
+                      title: "Original designs, made in-house",
+                      body: "Every fountain is an original design developed and produced by our own team.",
                     },
                     {
                       icon: <ShieldIcon size={17} />,
-                      title: "Shockproof custom packing",
-                      body: "Molded cushioning cradles fragile ceramic elements across transit.",
+                      title: "Demo checkout",
+                      body: "No payment is collected and nothing is shipped from this demo storefront.",
                     },
                   ].map((pledge) => (
                     <div key={pledge.title} className="flex items-start gap-2">

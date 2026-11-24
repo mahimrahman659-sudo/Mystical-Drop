@@ -5,6 +5,7 @@ import {
   getProductPrice,
   getTestDb,
   loginViaUi,
+  priceTestProducts,
   promoteAdmin,
   resetTestDatabase,
   runDbSetup,
@@ -12,6 +13,7 @@ import {
 
 test.beforeEach(async () => {
   await resetTestDatabase();
+  await priceTestProducts();
 });
 
 async function loginAsAdmin(
@@ -91,7 +93,7 @@ test("product editing, validation, archival, and setup idempotency", async ({
   await loginAsAdmin(page, request);
   const guestOrder = await createGuestOrderViaApi(
     request,
-    [{ slug: "rustic-tree-stone-well", quantity: 1 }],
+    [{ slug: "fountain-01", quantity: 1 }],
     {
       fullName: "Snapshot Guest",
       phone: "01712345678",
@@ -101,12 +103,12 @@ test("product editing, validation, archival, and setup idempotency", async ({
     },
   );
 
-  await page.goto("/admin/products/rustic-tree-stone-well/edit");
+  await page.goto("/admin/products/fountain-01/edit");
   await page.getByLabel(/Price \(BDT\)/).fill("4500");
   await page.getByRole("button", { name: "Save product" }).click();
   await page.waitForURL(/\/admin\/products\?saved=updated/, { timeout: 30_000 });
 
-  await page.goto("/products/rustic-tree-stone-well");
+  await page.goto("/products/fountain-01");
   await expect(page.getByText("৳4,500").first()).toBeVisible();
 
   const db = await getTestDb();
@@ -116,21 +118,21 @@ test("product editing, validation, archival, and setup idempotency", async ({
 
   const setupOutput = runDbSetup();
   expect(setupOutput).toContain("Running setup again is safe");
-  expect(await getProductPrice("rustic-tree-stone-well")).toBe(4500);
+  expect(await getProductPrice("fountain-01")).toBe(4500);
   expect(await db.collection("orders").countDocuments()).toBe(1);
 
   await page.goto("/admin/products");
   const rusticRow = page.locator("li").filter({
-    has: page.getByRole("heading", { name: "Rustic Tree & Stone Well Fountain" }),
+    has: page.getByRole("heading", { name: "Rustic Miniature Well Fountain" }),
   });
   await rusticRow.getByRole("button", { name: "Archive" }).click();
   await page.waitForURL(/saved=status/, { timeout: 30_000 });
 
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Rustic Tree & Stone Well Fountain" }),
+    page.getByRole("heading", { name: "Rustic Miniature Well Fountain" }),
   ).toHaveCount(0);
-  await page.goto("/products/rustic-tree-stone-well");
+  await page.goto("/products/fountain-01");
   await expect(page.getByText(/Archived/).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Add to Cart" })).toHaveCount(0);
 
@@ -147,7 +149,7 @@ test("product editing, validation, archival, and setup idempotency", async ({
         postalCode: "1230",
         instructions: "",
       },
-      items: [{ slug: "rustic-tree-stone-well", quantity: 1 }],
+      items: [{ slug: "fountain-01", quantity: 1 }],
       expectedTotal: 4500,
     },
   });
@@ -155,7 +157,7 @@ test("product editing, validation, archival, and setup idempotency", async ({
 
   await page.goto("/admin/products");
   const archivedRow = page.locator("li").filter({
-    has: page.getByRole("heading", { name: "Rustic Tree & Stone Well Fountain" }),
+    has: page.getByRole("heading", { name: "Rustic Miniature Well Fountain" }),
   });
   await archivedRow.getByRole("button", { name: "Restore" }).click();
   await page.waitForURL(/saved=status/, { timeout: 30_000 });
@@ -174,7 +176,7 @@ test("product editing, validation, archival, and setup idempotency", async ({
   await page.getByRole("button", { name: "Create product" }).click();
   await expect(page.getByText(/Price must be greater than zero/)).toBeVisible();
 
-  await page.getByLabel(/URL slug/).fill("bamboo-cascade");
+  await page.getByLabel(/URL slug/).fill("fountain-02");
   await page.getByLabel(/Price \(BDT\)/).fill("3999");
   await page.getByRole("button", { name: "Create product" }).click();
   await expect(page.getByText(/That slug is already in use/)).toBeVisible();
@@ -196,7 +198,7 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
   await loginAsAdmin(page, request);
   const first = await createGuestOrderViaApi(
     request,
-    [{ slug: "bamboo-cascade", quantity: 1 }],
+    [{ slug: "fountain-02", quantity: 1 }],
     {
       fullName: "Order One",
       phone: "01712345678",
@@ -207,7 +209,7 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
   );
   const second = await createGuestOrderViaApi(
     request,
-    [{ slug: "terracotta-pot", quantity: 1 }],
+    [{ slug: "fountain-03", quantity: 1 }],
     {
       fullName: "Order Two",
       phone: "01812345678",
@@ -326,7 +328,7 @@ test("database setup preserves records and enforces seed identity rules", async 
   test.slow();
   const order = await createGuestOrderViaApi(
     request,
-    [{ slug: "bamboo-cascade", quantity: 1 }],
+    [{ slug: "fountain-02", quantity: 1 }],
     {
       fullName: "Setup Fixture Order",
       phone: "01712345678",
@@ -417,7 +419,7 @@ test("database setup preserves records and enforces seed identity rules", async 
   expect(duplicateSeedRejected).toBe(true);
 
   await products.updateOne(
-    { slug: "rustic-tree-stone-well" },
+    { slug: "fountain-01" },
     { $set: { price: 4321, status: "archived" } },
   );
 
@@ -427,7 +429,7 @@ test("database setup preserves records and enforces seed identity rules", async 
   expect(secondSetup).toContain("Catalog seed inserted: 0");
   expect(secondSetup).toContain("Seeded catalog rows: 4");
 
-  const editedSeed = await products.findOne({ slug: "rustic-tree-stone-well" });
+  const editedSeed = await products.findOne({ slug: "fountain-01" });
   expect(editedSeed?.price).toBe(4321);
   expect(editedSeed?.status).toBe("archived");
   expect(
@@ -441,7 +443,7 @@ test("database setup preserves records and enforces seed identity rules", async 
   ).toBe(1);
 
   await products.updateOne(
-    { seedId: "bamboo-cascade" },
+    { seedId: "fountain-03" },
     {
       $set: {
         "gallery.2.alt":
@@ -453,11 +455,11 @@ test("database setup preserves records and enforces seed identity rules", async 
   const catalogBody = (await catalog.json()) as {
     products: Array<{ slug: string; gallery: Array<{ alt: string }> }>;
   };
-  const bamboo = catalogBody.products.find(
-    (product) => product.slug === "bamboo-cascade",
+  const woodland = catalogBody.products.find(
+    (product) => product.slug === "fountain-03",
   );
-  expect(bamboo?.gallery[2]?.alt).toContain("Mystical Drop");
-  expect(bamboo?.gallery[2]?.alt).not.toContain("TerraNova");
+  expect(woodland?.gallery[2]?.alt).toContain("Mystical Drop");
+  expect(woodland?.gallery[2]?.alt).not.toContain("TerraNova");
 });
 
 test("admin can upload a product image and homepage banner", async ({
@@ -468,7 +470,7 @@ test("admin can upload a product image and homepage banner", async ({
   await loginAsAdmin(page, request);
   const imagePath = "public/images/terracotta-detail.jpg";
 
-  await page.goto("/admin/products/rustic-tree-stone-well/edit");
+  await page.goto("/admin/products/fountain-01/edit");
   await page
     .getByLabel("Upload Main image", { exact: true })
     .setInputFiles(imagePath);
@@ -486,7 +488,7 @@ test("admin can upload a product image and homepage banner", async ({
   const db = await getTestDb();
   const product = await db
     .collection("products")
-    .findOne({ slug: "rustic-tree-stone-well" });
+    .findOne({ slug: "fountain-01" });
   expect(product?.image?.src).toBe(productImageSrc);
   const imageResponse = await request.get(productImageSrc);
   expect(imageResponse.status()).toBe(200);
@@ -529,7 +531,7 @@ test("admin screens fit phone, tablet, and desktop widths", async ({
   await loginAsAdmin(page, request);
   const order = await createGuestOrderViaApi(
     request,
-    [{ slug: "bamboo-cascade", quantity: 1 }],
+    [{ slug: "fountain-02", quantity: 1 }],
     {
       fullName: "Responsive Admin Order",
       phone: "01712345678",
@@ -545,7 +547,7 @@ test("admin screens fit phone, tablet, and desktop widths", async ({
     { path: "/admin", heading: /Overview/ },
     { path: "/admin/products", heading: /Products/ },
     { path: "/admin/products/new", heading: /New product/ },
-    { path: "/admin/products/rustic-tree-stone-well/edit", heading: /Edit product/ },
+    { path: "/admin/products/fountain-01/edit", heading: /Edit product/ },
     { path: "/admin/orders", heading: /Orders/ },
     { path: `/admin/orders/${order.id}`, heading: new RegExp(`#${order.reference}`) },
     { path: "/admin/settings", heading: /Site banner/ },

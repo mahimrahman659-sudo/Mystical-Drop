@@ -12,6 +12,7 @@ import {
   ArrowRightIcon,
   BagIcon,
   DropletIcon,
+  InfoIcon,
   ShieldIcon,
   TrashIcon,
   WavesIcon,
@@ -53,6 +54,7 @@ export function CartView() {
     quantity,
     subtotal,
     total,
+    hasUnpriced,
     isHydrated,
     catalogError,
     unavailableLines,
@@ -135,7 +137,7 @@ export function CartView() {
             </span>
           </div>
           <p className="text-body-sm italic text-on-surface-variant">
-            Calibrated for acoustic stillness and mindful living
+            Original tabletop fountains, made in-house
           </p>
         </div>
 
@@ -155,12 +157,11 @@ export function CartView() {
             Your Cart is Currently Empty
           </h2>
           <p className="mt-2 max-w-md text-body-md leading-relaxed text-on-surface-variant">
-            Invite the peaceful murmur of natural cascading water into your
-            sanctuary. Explore our three limited-edition hand-carved tabletop
-            fountains.
+            Browse our original collection of decorative tabletop fountains and
+            save the designs you would like to revisit.
           </p>
           <Link href="/#collection" className="btn btn-primary mt-space-lg">
-            Explore Our 3 Handcrafted Fountains
+            Explore Our Fountains
             <ArrowRightIcon size={17} />
           </Link>
         </div>
@@ -198,7 +199,7 @@ export function CartView() {
           </span>
         </div>
         <p className="text-body-sm italic text-on-surface-variant">
-          Calibrated for acoustic stillness and mindful living
+          Original tabletop fountains, made in-house
         </p>
       </div>
 
@@ -206,6 +207,19 @@ export function CartView() {
         count={unavailableLines.length}
         onRemove={removeUnavailable}
       />
+
+      {hasUnpriced ? (
+        <div
+          role="status"
+          className="mt-4 flex items-start gap-2 rounded border border-outline-variant/60 bg-surface-container-low px-4 py-3 text-body-sm text-on-surface-variant"
+        >
+          <InfoIcon size={18} className="mt-0.5 shrink-0 text-secondary" />
+          <span>
+            One or more fountains in your cart does not have a confirmed price
+            yet. Checkout opens as soon as every price in the cart is announced.
+          </span>
+        </div>
+      ) : null}
 
       <div className="mt-space-lg grid grid-cols-1 items-start gap-gutter lg:grid-cols-12 lg:gap-space-lg">
         <div className="flex flex-col gap-space-md lg:col-span-8">
@@ -301,12 +315,11 @@ export function CartView() {
             </div>
             <div>
               <p className="text-label-md font-semibold uppercase tracking-wider text-on-surface">
-                Safe Transit Guarantee
+                Original designs, made in-house
               </p>
               <p className="mt-0.5 text-body-sm leading-relaxed text-on-surface-variant">
-                Custom-molded double-layer cushioning and a reinforced outer crate
-                protect every fountain during courier transit anywhere in
-                Bangladesh.
+                Every fountain in our collection is an original Mystical Drop
+                design, developed and produced by our own team.
               </p>
             </div>
           </div>
@@ -358,12 +371,6 @@ export function CartView() {
                   {FREE_SHIPPING.valueLabel}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-4 text-on-surface-variant">
-                <span>Acoustic In-Home Setup</span>
-                <span className="text-label-sm font-medium uppercase text-secondary">
-                  Complimentary
-                </span>
-              </div>
             </div>
 
             <div className="h-px w-full bg-surface-container" />
@@ -371,10 +378,10 @@ export function CartView() {
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <div className="flex flex-col">
                 <span className="text-label-md uppercase tracking-wider text-on-surface-variant">
-                  Total Payable
+                  Total
                 </span>
                 <span className="text-label-sm text-on-surface-variant">
-                  Includes all duties & insurance
+                  Prices in Bangladeshi Taka
                 </span>
               </div>
               <span className="price text-headline-md font-bold text-primary">
@@ -382,13 +389,23 @@ export function CartView() {
               </span>
             </div>
 
-            <Link
-              href="/checkout"
-              className="btn btn-primary w-full py-3.5 uppercase tracking-wider"
-            >
-              Proceed to Checkout
-              <ArrowRightIcon size={18} />
-            </Link>
+            {hasUnpriced ? (
+              <button
+                type="button"
+                disabled
+                className="btn w-full cursor-not-allowed bg-surface-container-high py-3.5 uppercase tracking-wider text-on-surface-variant opacity-80"
+              >
+                Checkout unavailable — price pending
+              </button>
+            ) : (
+              <Link
+                href="/checkout"
+                className="btn btn-primary w-full py-3.5 uppercase tracking-wider"
+              >
+                Proceed to Checkout
+                <ArrowRightIcon size={18} />
+              </Link>
+            )}
 
             <div className="flex flex-col gap-space-xs pt-space-xs">
               <span className="text-center text-label-sm uppercase tracking-widest text-on-surface-variant">
@@ -417,7 +434,7 @@ export function CartView() {
             <div className="flex items-center gap-space-xs rounded bg-surface-container-low p-space-sm">
               <WavesIcon size={19} className="shrink-0 text-secondary" />
               <p className="text-label-sm leading-4 text-on-surface-variant">
-                Eligible for 48-Hour In-Home Acoustic Resonance Trial in Dhaka.
+                This storefront runs a demo checkout — no payment is collected.
               </p>
             </div>
           </div>

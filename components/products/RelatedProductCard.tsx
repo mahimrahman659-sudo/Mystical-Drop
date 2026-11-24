@@ -7,7 +7,7 @@ import {
   ArrowUpRightIcon,
   BagIcon,
 } from "@/components/ui/icons";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, isPriced } from "@/lib/format";
 import type { Product } from "@/lib/products";
 
 export function RelatedProductCard({ product }: { product: Product }) {
@@ -51,15 +51,22 @@ export function RelatedProductCard({ product }: { product: Product }) {
             <span className="text-label-sm uppercase tracking-wider text-on-surface-variant">
               Price
             </span>
-            <span className="price text-headline-sm text-on-surface">
-              {formatPrice(product.price)}
-            </span>
+            {isPriced(product.price) ? (
+              <span className="price text-headline-sm text-on-surface">
+                {formatPrice(product.price)}
+              </span>
+            ) : (
+              <span className="text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant">
+                Coming Soon
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => addItem(product.slug, 1)}
-              className="btn btn-primary min-h-10 px-3.5 py-2 text-label-md uppercase"
+              disabled={!isPriced(product.price)}
+              className="btn btn-primary min-h-10 px-3.5 py-2 text-label-md uppercase disabled:cursor-not-allowed disabled:opacity-45"
             >
               <BagIcon size={15} />
               Add

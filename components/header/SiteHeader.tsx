@@ -24,7 +24,16 @@ const navItems = [
     label: "Our Fountains",
     match: (pathname: string) => pathname.startsWith("/products"),
   },
-  { href: "/#about", label: "About" },
+  {
+    href: "/innovation",
+    label: "Our Innovation",
+    match: (pathname: string) => pathname.startsWith("/innovation"),
+  },
+  {
+    href: "/about",
+    label: "Our Story",
+    match: (pathname: string) => pathname.startsWith("/about"),
+  },
   { href: "/#contact", label: "Contact" },
 ];
 
@@ -58,7 +67,7 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav aria-label="Main navigation" className="hidden items-center gap-4 md:flex lg:gap-space-lg">
+        <nav aria-label="Main navigation" className="hidden items-center gap-3 lg:flex lg:gap-space-lg">
           {navItems.map((item) => {
             const active = item.match?.(pathname);
             return (
@@ -134,7 +143,7 @@ export function SiteHeader() {
             aria-label="Open menu"
             aria-haspopup="dialog"
             aria-expanded={menuOpen}
-            className="icon-button md:hidden"
+            className="icon-button lg:hidden"
           >
             <MenuIcon size={22} />
           </button>

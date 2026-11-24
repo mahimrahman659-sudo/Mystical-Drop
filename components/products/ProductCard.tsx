@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCart } from "@/components/cart/CartProvider";
 import { FavoriteButton } from "@/components/products/FavoriteButton";
 import { BagIcon, WavesIcon } from "@/components/ui/icons";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, isPriced } from "@/lib/format";
 import type { Product } from "@/lib/products";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -52,9 +52,15 @@ export function ProductCard({ product }: { product: Product }) {
               {product.name}
             </Link>
           </h3>
-          <span className="price shrink-0 whitespace-nowrap text-headline-sm font-semibold text-primary">
-            {formatPrice(product.price)}
-          </span>
+          {isPriced(product.price) ? (
+            <span className="price shrink-0 whitespace-nowrap text-headline-sm font-semibold text-primary">
+              {formatPrice(product.price)}
+            </span>
+          ) : (
+            <span className="shrink-0 whitespace-nowrap text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant">
+              Price Coming Soon
+            </span>
+          )}
         </div>
         <p className="mt-2 line-clamp-3 text-body-sm leading-relaxed text-on-surface-variant">
           {product.description}
@@ -79,7 +85,13 @@ export function ProductCard({ product }: { product: Product }) {
           <button
             type="button"
             onClick={() => addItem(product.slug, 1)}
-            className="btn btn-primary min-w-[9.5rem] flex-1 px-4"
+            disabled={!isPriced(product.price)}
+            className="btn btn-primary min-w-[9.5rem] flex-1 px-4 disabled:cursor-not-allowed disabled:opacity-45"
+            title={
+              isPriced(product.price)
+                ? undefined
+                : "This fountain becomes available for purchase when its price is announced."
+            }
           >
             <BagIcon size={17} />
             Add to Cart

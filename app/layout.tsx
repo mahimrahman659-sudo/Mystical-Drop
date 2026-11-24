@@ -14,22 +14,22 @@ export const metadata: Metadata = {
     template: `%s • ${BRAND_NAME}`,
   },
   description:
-    "Handcrafted tabletop water fountains from Bengal, designed for meditative calm, acoustic stillness, and mindful spaces.",
+    "Original decorative tabletop water fountains by Mystical Drop — nature-inspired designs developed and made in-house in Bangladesh.",
   applicationName: BRAND_NAME,
   verification: {
     google: "SrK0VfQ50nOdwRILvb6jaRvHWW6Edd2Ekq84ZdR94S0",
   },
   keywords: [
     BRAND_NAME,
-    "handcrafted fountains",
+    "tabletop water fountains",
+    "decorative fountains",
     "Bangladesh",
-    "indoor water fountain",
-    "artisanal stoneware",
+    "original fountain designs",
   ],
   openGraph: {
     title: `${BRAND_NAME} — ${BRAND_TAGLINE}`,
     description:
-      "Handcrafted tabletop fountains, shaped in small batches for quiet, restorative spaces.",
+      "Original decorative tabletop fountains, designed and made in-house by Mystical Drop.",
     type: "website",
     siteName: BRAND_NAME,
   },

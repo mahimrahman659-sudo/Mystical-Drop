@@ -26,13 +26,12 @@ export async function SiteFooter() {
               </span>
             </div>
             <p className="max-w-xs text-body-sm leading-relaxed text-on-surface-variant">
-              Artisanal stoneware indoor fountains designed for meditative calm,
-              acoustic stillness, and mindful spaces. Hand-carved in limited
-              batches.
+              Original decorative tabletop water fountains — nature-inspired
+              designs developed and made in-house by our team.
             </p>
             <div className="pt-space-xs">
               <p className="text-label-sm uppercase tracking-wider text-on-surface-variant">
-                Dhaka Studio
+                Studio
               </p>
               <p className="mt-1 text-body-sm text-on-surface">
                 7/8-A Free School Street, Hatirpool, Dhaka-1205
@@ -54,10 +53,13 @@ export async function SiteFooter() {
                     href={`/products/${product.slug}`}
                     className="text-on-surface transition-colors hover:text-primary"
                   >
-                    {product.catalogNumber}. {product.shortName}{" "}
-                    <span lang="bn" className="font-bengali text-primary">
-                      ({product.nativeName})
-                    </span>
+                    {product.catalogNumber}. {product.shortName}
+                    {product.nativeName ? (
+                      <span lang="bn" className="font-bengali text-primary">
+                        {" "}
+                        ({product.nativeName})
+                      </span>
+                    ) : null}
                   </Link>
                   <span className="text-label-sm text-on-surface-variant">
                     {product.collectionLine}
@@ -76,36 +78,41 @@ export async function SiteFooter() {
 
           <div className="flex flex-col gap-space-sm">
             <h2 className="text-label-sm uppercase tracking-wider text-on-surface-variant">
-              Care & Guarantee
+              Contact
             </h2>
             <p className="max-w-sm text-body-sm leading-relaxed text-on-surface-variant">
-              Experience water resonance in your home. Every {BRAND_NAME} fountain
-              includes our complimentary 48-Hour In-Home Acoustic Testing
-              Guarantee and artisan setup guidance.
+              Questions about the designs, specifications, or availability?
+              Reach us by phone — we are happy to help.
             </p>
             <div className="space-y-space-xs pt-space-xs text-body-sm">
-              <p className="break-words text-on-surface">
-                <span className="text-on-surface-variant">Support email:</span>{" "}
-                to be confirmed
-              </p>
               <p className="text-on-surface">
-                <span className="text-on-surface-variant">Contact:</span>{" "}
-                01646886795
+                <span className="text-on-surface-variant">Phone:</span>{" "}
+                <a
+                  href="tel:01646886795"
+                  className="underline-offset-2 transition-colors hover:text-primary hover:underline"
+                >
+                  01646886795
+                </a>
+              </p>
+              <p className="text-on-surface-variant">
+                Care guides will be published with the final product
+                specifications.
               </p>
             </div>
           </div>
 
           <div className="flex flex-col gap-space-sm">
             <h2 className="text-label-sm uppercase tracking-wider text-on-surface-variant">
-              Artisanal Checkout
+              Checkout
             </h2>
             <p className="max-w-xs text-body-sm leading-relaxed text-on-surface-variant">
-              Cash on Delivery demo with doorstep delivery throughout Bangladesh.
-              Online payments are not connected in this demo.
+              This storefront runs a demo checkout with Cash on Delivery across
+              Bangladesh. No payment is collected online, and ordering opens
+              once prices are announced.
             </p>
             <div className="pt-space-xs">
               <p className="mb-space-xs text-label-sm uppercase tracking-wider text-on-surface-variant">
-                Payment Partners
+                Payment methods
               </p>
               <div className="flex flex-wrap gap-2">
                 <span className="rounded bg-surface px-2 py-1 text-label-sm text-on-surface">
@@ -131,13 +138,21 @@ export async function SiteFooter() {
 
         <div className="flex flex-col items-center justify-between gap-space-sm border-t border-outline-variant/30 pt-space-lg sm:flex-row">
           <p className="text-center text-label-sm leading-5 text-on-surface-variant sm:text-left">
-            © 2026 {BRAND_NAME}. Handcrafted with reverence in Dhaka. Demo
-            storefront.
+            © 2026 {BRAND_NAME}. Original designs by our team. Demo storefront.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-space-md gap-y-1">
-            <span className="text-label-sm text-on-surface-variant">
-              Terms & Acoustic Trial
-            </span>
+            <Link
+              href="/about"
+              className="text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-on-surface hover:underline"
+            >
+              Our Story
+            </Link>
+            <Link
+              href="/innovation"
+              className="text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-on-surface hover:underline"
+            >
+              Our Innovation
+            </Link>
             <Link
               href="/privacy"
               className="text-label-sm text-on-surface-variant underline-offset-2 transition-colors hover:text-on-surface hover:underline"

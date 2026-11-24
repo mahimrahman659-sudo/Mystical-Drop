@@ -391,16 +391,6 @@ export function ConfirmationView() {
                       Complimentary
                     </span>
                   </div>
-                  <div className="flex justify-between gap-3 text-body-sm text-on-surface-variant">
-                    <span>Acoustic calibration setup</span>
-                    <span className="text-label-sm font-medium uppercase text-secondary">
-                      Included
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-3 text-body-sm text-on-surface-variant">
-                    <span>Cash-on-delivery processing fee</span>
-                    <span className="text-on-surface">৳0</span>
-                  </div>
                   <div className="mt-space-xs flex flex-wrap items-baseline justify-between gap-2 border-t border-outline-variant/30 pt-space-xs">
                     <div>
                       <span className="font-display text-headline-sm text-on-surface">
@@ -445,11 +435,11 @@ export function ConfirmationView() {
                   <WavesIcon size={18} className="text-secondary" />
                 </div>
                 <h3 className="mb-space-xs font-display text-headline-sm text-on-surface">
-                  Acoustic &amp; Pump Inspection
+                  Order Confirmation
                 </h3>
                 <p className="text-body-sm leading-relaxed text-on-surface-variant">
-                  The submersible pump would be run for 48 hours to test motor
-                  silence and droplet cadence.
+                  The order details would be verified with you before anything
+                  is prepared for dispatch.
                 </p>
               </div>
               <p className="mt-space-md text-label-sm text-on-surface-variant">
@@ -465,11 +455,11 @@ export function ConfirmationView() {
                   <PackageIcon size={18} className="text-on-surface-variant" />
                 </div>
                 <h3 className="mb-space-xs font-display text-headline-sm text-on-surface">
-                  Custom Shockproof Packaging
+                  Packaging &amp; Dispatch
                 </h3>
                 <p className="text-body-sm leading-relaxed text-on-surface-variant">
-                  Molded cushioning would cradle the ceramic and stoneware chambers
-                  against road vibration.
+                  The fountain would be packed securely and handed to a delivery
+                  partner for transit.
                 </p>
               </div>
               <p className="mt-space-md text-label-sm text-on-surface-variant">
@@ -485,7 +475,7 @@ export function ConfirmationView() {
                   <ShieldIcon size={18} className="text-on-surface-variant" />
                 </div>
                 <h3 className="mb-space-xs font-display text-headline-sm text-on-surface">
-                  Courier Dispatch &amp; Call
+                  Delivery Call
                 </h3>
                 <p className="text-body-sm leading-relaxed text-on-surface-variant">
                   A delivery partner would call before arrival to arrange a safe

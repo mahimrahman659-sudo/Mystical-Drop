@@ -29,7 +29,8 @@ type MobileMenuProps = {
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/#collection", label: "Our Fountains" },
-  { href: "/#about", label: "About" },
+  { href: "/innovation", label: "Our Innovation" },
+  { href: "/about", label: "Our Story" },
   { href: "/#contact", label: "Contact" },
 ];
 

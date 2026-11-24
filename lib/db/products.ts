@@ -66,7 +66,7 @@ export type ProductWriteInput = {
   collectionLine: string;
   flowLabel: string;
   flowDescription: string;
-  price: number;
+  price: number | null;
   description: string;
   longDescription: string;
   imageSrc: string;
@@ -101,36 +101,33 @@ export async function createProduct(input: ProductWriteInput): Promise<StoredPro
     updatedAt: now,
     image: {
       src: input.imageSrc,
-      alt: `${input.name} — handcrafted ${BRAND_NAME} water fountain`,
+      alt: `${input.name} — decorative tabletop water fountain by ${BRAND_NAME}`,
     },
     cartImage: input.gallerySources[0] || input.imageSrc,
     gallery: buildGallery(input.name, input.imageSrc, input.gallerySources),
     features: [
-      "Hand-finished small-batch piece",
-      "Quiet submersible pump",
-      "Natural stone and clay detailing",
+      `Original ${BRAND_NAME} design`,
+      "Decorative tabletop water fountain",
+      "Made in-house by our team",
     ],
     specs: [
-      { label: "Dimensions", value: "Contact the studio for sizing" },
-      { label: "Acoustic Decibel", value: input.flowDescription },
-      { label: "Material Build", value: input.provenance },
-      { label: "Acoustic Pump", value: "Low-voltage silent submersible" },
+      {
+        label: "Specifications",
+        value: "Dimensions, materials, and pump details to be confirmed",
+      },
     ],
-    included: ["Low-voltage silent submersible pump"],
+    included: [],
     care: {
-      story: `Each ${BRAND_NAME} piece is assembled and finished by hand in the studio. Natural variation in surface, tone, and stone arrangement is part of the work.`,
+      story: `Each ${BRAND_NAME} piece is designed and made in-house by our team. Full design notes for this piece are being completed.`,
       storyPoints: [
-        "Hand-finished details unique to this edition",
-        "Quiet pump selected for domestic rooms",
-        "Stable base keeps the fountain steady in daily use",
+        `Original design developed by ${BRAND_NAME}`,
+        "Decorative tabletop format",
+        "Small-batch, in-house production",
       ],
-      setup:
-        "Set the fountain on a level, water-resistant surface. Fill the reservoir, submerge the pump, and connect the water line before plugging it into a standard outlet.",
-      water:
-        "Filtered or RO water is recommended to reduce mineral residue.",
-      rinse:
-        "Wipe the basin with a soft cloth and rinse the stones every two weeks.",
-      note: "Never run the pump dry. Empty and dry the fountain before storage.",
+      setup: "",
+      water: "",
+      rinse: "",
+      note: "",
     },
   };
 
@@ -166,7 +163,7 @@ export async function updateProduct(
     image: {
       ...current.image,
       src: input.imageSrc,
-      alt: `${input.name} — handcrafted ${BRAND_NAME} water fountain`,
+      alt: `${input.name} — decorative tabletop water fountain by ${BRAND_NAME}`,
     },
     cartImage: input.gallerySources[0] || input.imageSrc,
     gallery: buildGallery(input.name, input.imageSrc, input.gallerySources, current.gallery),
