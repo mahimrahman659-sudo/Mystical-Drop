@@ -1,17 +1,15 @@
 # Mystical Drop — Owner Decisions Required
 
-**Date:** 2026-11-24 · Nothing below was invented or decided on your behalf. Items are ordered by blocking severity.
+**Updated:** 2026-11-25 · **Resolved since first release:** A1 (photos delivered via admin upload), A2 (moot — `rustic-lifestyle.jpg` no longer used as P01's main image), A4 (prices set: **৳399 each** on all three fountains; ordering is live). Remaining items below.
 
 ---
 
-## A. Blocking (needed before this work is "complete")
+## A. Open — presentation completeness
 
-| # | Decision / asset | Why it blocks | What happens meanwhile |
+| # | Decision / asset | Why it matters | What happens meanwhile |
 |---|---|---|---|
-| A1 | **Supply the three original photos** `1000014235.jpg`, `1000014236.jpg`, `1000013855.jpg` (or copies) | Phase 2 image integration was stopped per instructions — files not found anywhere on this machine | fountain-02 shows an honest "photograph coming soon" placeholder; P01/P03 use best-available real photos |
-| A2 | **Confirm whether `public/images/rustic-lifestyle.jpg` is the Product 01 original** (well + bucket + crossbar + blue glow — matches your description exactly, provenance unverified) | If it's an AI/stock render, it must be swapped for the true original | Currently displayed as fountain-01's photo |
-| A3 | **Final product names** for fountain-01/02/03 | Draft names are labelled as drafts everywhere; must not ship as final branding | Draft names + "Draft name" badges; clear `DRAFT_NAME_SLUGS` after approval |
-| A4 | **Confirmed prices** (or explicit "keep Coming Soon") | Prices drive purchase availability | All prices null → storefront fully non-purchasable (by design); admin can set price + keep status Active to open ordering |
+| A1′ | **Named source files** `1000014235/4236/3855.jpg` were never located on this machine | Your admin uploads are now live and verified (not logos, not duplicates), but the byte-original files with those names still aren't archived anywhere findable | Store the three files somewhere durable (cloud drive) for your own records — the site itself no longer depends on them |
+| A3 | **Final product names** for fountain-01/02/03 | Draft names + "Draft name" badges ship on every product page | Draft labels until you approve finals → then clear `DRAFT_NAME_SLUGS` |
 
 ## B. High — trust & legal
 

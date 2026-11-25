@@ -252,6 +252,12 @@ export async function priceTestProducts(
   }
 }
 
+/** Seeds ship priced at 399 (matching production); price-hiding tests opt out. */
+export async function unpriceTestProducts(): Promise<void> {
+  const db = await getTestDb();
+  await db.collection("products").updateMany({}, { $set: { price: null } });
+}
+
 export async function seedCart(
   context: BrowserContext,
   lines: Array<{ slug: string; quantity: number }>,

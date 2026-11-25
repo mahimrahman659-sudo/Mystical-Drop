@@ -272,8 +272,8 @@ export default async function HomePage() {
           <div className="lg:col-span-6">
             <div className="relative h-[300px] overflow-hidden rounded-lg bg-surface-container shadow-sm sm:h-[400px] lg:h-[440px]">
               <Image
-                src="/images/rustic-lifestyle.jpg"
-                alt="A rustic miniature well fountain with a hanging bucket and softly lit water basin on display"
+                src="/images/fountain-01.jpg"
+                alt="Original photograph of the rustic miniature well fountain with a hanging bucket and softly lit basin"
                 fill
                 sizes="(min-width: 1024px) 50vw, 100vw"
                 className="object-cover"

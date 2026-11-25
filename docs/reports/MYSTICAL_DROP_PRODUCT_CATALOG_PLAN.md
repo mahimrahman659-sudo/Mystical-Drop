@@ -1,6 +1,6 @@
 # Mystical Drop — Product Catalog Plan
 
-**Date:** 2026-11-24 · Status: **implemented locally** (owner confirmation pending on names/prices/photos)
+**Updated:** 2026-11-25 · Prices set and P01/P02 photos delivered by owner via admin · Names still pending
 
 ---
 
@@ -8,13 +8,13 @@
 
 | Internal ID (slug) | Draft customer name (⚠ not final) | Short name | Catalog no. | Price | Photo status |
 |---|---|---|---|---|---|
-| `fountain-01` | Rustic Miniature Well Fountain | Miniature Well | 01 | **null** (Coming Soon) | `public/images/rustic-lifestyle.jpg` — **matches the owner's visual description** (stone-textured well, hanging bucket, wooden crossbar, blue illumination). Provenance vs. `1000014235.jpg` **UNCONFIRMED** — owner to verify. |
-| `fountain-02` | Twin-Bowl Cascade Fountain | Twin-Bowl Cascade | 02 | **null** (Coming Soon) | **MISSING** — honest placeholder `public/images/photograph-pending.png` ("Original photograph coming soon"). No real photo exists anywhere on the machine. |
-| `fountain-03` | Woodland Tree & Well Fountain | Woodland Tree & Well | 03 | **null** (Coming Soon) | `rustic-well.jpg` (main) + `rustic-wellhead.jpg` (detail) — real photos matching the owner's visual description (tree trunk, roots, miniature stone well, elevated bowl). |
+| `fountain-01` | Rustic Miniature Well Fountain | Miniature Well | 01 | **৳399** (owner-set via admin, 2026-11-25) | **Original uploaded via admin** → also mirrored as `public/images/fountain-01.jpg` (1650×2200). Verified: not a logo, not a duplicate of any existing asset. |
+| `fountain-02` | Twin-Bowl Cascade Fountain | Twin-Bowl Cascade | 02 | **৳399** (owner-set via admin, 2026-11-25) | **Original uploaded via admin** → mirrored as `public/images/fountain-02.jpg` (1254×1254). Placeholder retired. Verified: not a logo, not a duplicate. |
+| `fountain-03` | Woodland Tree & Well Fountain | Woodland Tree & Well | 03 | **৳399** (owner-set via admin, 2026-11-25) | `rustic-well.jpg` + `rustic-wellhead.jpg` — real photos matching the owner's visual description. No new upload needed. |
 
-**Naming rule:** draft names are descriptive labels derived from the owner's visual descriptions. A visible **"Draft name"** badge renders on product pages for all three (`DRAFT_NAME_SLUGS` in `lib/products.ts`). Clear the set when final names are approved. Names are also flagged on the homepage collection section ("Product names shown are working drafts").
+**Naming rule:** draft names are still in force — a visible **"Draft name"** badge renders on product pages (`DRAFT_NAME_SLUGS` in `lib/products.ts`). Clear the set when final names are approved.
 
-**Do not treat draft names as finalized branding.**
+**Seed policy:** `lib/products.ts` now mirrors production (৳399 + confirmed photos) so fresh installs match reality. A disaster-recovery `setup:db` therefore restores a sellable catalog at the confirmed price. E2E price-hiding tests explicitly unprice via `unpriceTestProducts()`; commerce tests keep their own test prices via `priceTestProducts()`.
 
 ## 2. Price & purchase policy (implemented)
 

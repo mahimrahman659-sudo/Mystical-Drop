@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { resetTestDatabase, seedCart, waitForAppReady } from "./helpers";
+import { resetTestDatabase, seedCart, unpriceTestProducts, waitForAppReady } from "./helpers";
 
 test.beforeEach(async () => {
   await resetTestDatabase();
+  // Seeds ship priced (matching production); this spec verifies the unpriced state.
+  await unpriceTestProducts();
 });
 
 test("unpriced products hide prices and disable purchase across the storefront", async ({

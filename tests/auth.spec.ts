@@ -723,7 +723,7 @@ test("auth and account screens fit phone, tablet, and desktop widths", async ({
     const anonymous = await browser.newContext({ viewport: { width, height: 900 } });
     const page = await anonymous.newPage();
     for (const route of ["/login", "/register", "/forgot-password"]) {
-      await page.goto(route, { waitUntil: "networkidle" });
+      await page.goto(route, { waitUntil: "load" });
       await waitForAppReady(page);
       await expect(page.locator("footer")).toBeVisible();
       if (route !== "/forgot-password") {
@@ -748,7 +748,8 @@ test("auth and account screens fit phone, tablet, and desktop widths", async ({
       storageState,
     });
     const accountPage = await signedIn.newPage();
-    await accountPage.goto("/account", { waitUntil: "networkidle" });
+    await accountPage.goto("/account", { waitUntil: "load" });
+    await waitForAppReady(accountPage);
     await expect(
       accountPage.getByRole("heading", { name: "Your quiet corner." }),
     ).toBeVisible();

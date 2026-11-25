@@ -9,6 +9,7 @@ import {
   promoteAdmin,
   resetTestDatabase,
   runDbSetup,
+  waitForAppReady,
 } from "./helpers";
 
 test.beforeEach(async () => {
@@ -243,11 +244,13 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
     password: "AdminTwoPass123",
     role: "admin",
   });
-  await page.goto(firstUrl, { waitUntil: "networkidle" });
+  await page.goto(firstUrl, { waitUntil: "load" });
+  await waitForAppReady(page);
   const secondAdminContext = await browser.newContext();
   const stalePage = await secondAdminContext.newPage();
   await loginViaUi(stalePage, "admin.two@example.com", "AdminTwoPass123");
-  await stalePage.goto(firstUrl, { waitUntil: "networkidle" });
+  await stalePage.goto(firstUrl, { waitUntil: "load" });
+  await waitForAppReady(stalePage);
 
   await page.getByRole("button", { name: /Mark as Confirmed/ }).click();
   await page.waitForURL(/updated=1/, { timeout: 30_000 });
@@ -277,7 +280,8 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
   await stalePage.waitForURL(/error=stale/, { timeout: 30_000 });
   await secondAdminContext.close();
 
-  await page.goto(firstUrl, { waitUntil: "networkidle" });
+  await page.goto(firstUrl, { waitUntil: "load" });
+  await waitForAppReady(page);
   await page.getByRole("button", { name: /Mark as Shipped/ }).click();
   await expect
     .poll(
@@ -288,7 +292,8 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
     )
     .toBe("shipped");
 
-  await page.goto(firstUrl, { waitUntil: "networkidle" });
+  await page.goto(firstUrl, { waitUntil: "load" });
+  await waitForAppReady(page);
   await page.evaluate(() => {
     const form = Array.from(document.querySelectorAll("form")).find((item) =>
       item.textContent?.includes("Move one step"),
@@ -305,7 +310,8 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
   await page.getByRole("button", { name: "Forge transition" }).click();
   await page.waitForURL(/error=invalid/, { timeout: 30_000 });
 
-  await page.goto(secondUrl, { waitUntil: "networkidle" });
+  await page.goto(secondUrl, { waitUntil: "load" });
+  await waitForAppReady(page);
   await page.getByRole("button", { name: "Cancel order" }).click();
   await page.waitForURL(/updated=1/, { timeout: 30_000 });
   const cancelled = await db.collection("orders").findOne({ reference: second.reference });
@@ -556,7 +562,8 @@ test("admin screens fit phone, tablet, and desktop widths", async ({
   for (const width of widths) {
     await page.setViewportSize({ width, height: 1000 });
     for (const item of pages) {
-      await page.goto(item.path, { waitUntil: "networkidle", timeout: 120_000 });
+      await page.goto(item.path, { waitUntil: "load", timeout: 120_000 });
+      await waitForAppReady(page);
       await expect(page.getByRole("heading", { name: item.heading }).first()).toBeVisible();
       await expect(page.locator("footer")).toBeVisible();
       const overflow = await page.evaluate(() => ({
@@ -569,7 +576,8 @@ test("admin screens fit phone, tablet, and desktop widths", async ({
     }
 
     if (width === 320) {
-      await page.goto("/account", { waitUntil: "networkidle" });
+      await page.goto("/account", { waitUntil: "load" });
+      await waitForAppReady(page);
       await page.getByRole("button", { name: "Open menu" }).click();
       const menu = page.getByRole("dialog", { name: "Site menu" });
       await expect(menu.getByRole("link", { name: "Account" })).toBeVisible();
