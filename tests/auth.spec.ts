@@ -13,7 +13,7 @@ import {
   resetLink,
   priceTestProducts,
   resetTestDatabase,
-  submitDemoOrder,
+  submitOrder,
   verificationLink,
   waitForAppReady,
   waitForMail,
@@ -340,13 +340,11 @@ test("cart survives registration and login, order appears in account and admin",
   await expect(page.locator("aside").getByText("Twin-Bowl Cascade").first()).toBeVisible();
   await expect(page.locator("aside").getByText("৳8,050").first()).toBeVisible();
   await expect(
-    page.getByText(/This storefront is not connected to a payment or fulfilment service/),
+    page.getByText(/no card details are ever requested/),
   ).toBeVisible();
   await expect(page.locator('input[value="cod"]')).toBeChecked();
-  await expect(page.locator('input[value="mfs"]')).toBeDisabled();
-  await expect(page.locator('input[value="card"]')).toBeDisabled();
 
-  await page.getByRole("button", { name: /Place Demo Order/ }).click();
+  await page.getByRole("button", { name: /Place Order/ }).click();
   await expect(page.getByText(/Please enter your full name/)).toBeVisible();
   await expect(page.getByText(/Please enter a mobile number/)).toBeVisible();
   await expect(page.getByText(/Please enter a complete street address/)).toBeVisible();
@@ -361,7 +359,7 @@ test("cart survives registration and login, order appears in account and admin",
     postalCode: "1213",
     instructions: "Please call before arrival.",
   });
-  await submitDemoOrder(page);
+  await submitOrder(page);
   const confirmationText = await page.locator("body").innerText();
   const reference = confirmationText.match(/#TNV-\d{5}/)?.[0].replace("#", "");
   expect(reference).toBeTruthy();
@@ -371,7 +369,7 @@ test("cart survives registration and login, order appears in account and admin",
   expect(order?.userId).toBeTruthy();
   expect(order?.total).toBe(8050);
   expect(order?.paymentStatus).toBe("not_collected");
-  expect(order?.demo).toBe(true);
+  expect(order?.paymentMethod).toBe("Cash on Delivery");
   expect(order?.items).toHaveLength(2);
 
   await page.reload();
@@ -434,7 +432,7 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
     street: "House 9, Road 4, Dhanmondi",
     city: "Dhaka",
   });
-  await submitDemoOrder(page);
+  await submitOrder(page);
 
   const reference = (await page.locator("body").innerText()).match(/#TNV-\d{5}/)?.[0].replace("#", "")!;
   const db = await getTestDb();
@@ -475,7 +473,7 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
   await expect(page.locator("header")).toBeHidden();
   await expect(page.locator("footer")).toBeHidden();
   await expect(
-    page.getByText("Demo order summary • Not a live invoice"),
+    page.getByText("Order summary • Cash on Delivery"),
   ).toBeVisible();
   await expect(
     page.locator(".print-only").getByText("Mystical Drop"),
@@ -487,7 +485,7 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
       (window as unknown as { __printed?: boolean }).__printed = true;
     };
   });
-  await page.getByRole("button", { name: /Print Invoice/ }).click();
+  await     page.getByRole("button", { name: /Print Order/ }).click();
   expect(
     await page.evaluate(
       () => (window as unknown as { __printed?: boolean }).__printed,

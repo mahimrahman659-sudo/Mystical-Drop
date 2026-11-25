@@ -3,7 +3,7 @@ import { ConfirmationView } from "@/components/checkout/ConfirmationView";
 
 export const metadata: Metadata = {
   title: "Order Confirmation",
-  description: "Your Mystical Drop demo order confirmation.",
+  description: "Your Mystical Drop order confirmation and delivery details.",
   robots: { index: false, follow: false },
 };
 

@@ -172,14 +172,14 @@ export function ConfirmationView() {
         <div className="print-only mb-6 border-b border-outline-variant pb-4">
           <p className="font-display text-headline-md text-on-surface">{BRAND_NAME}</p>
           <p className="text-body-sm text-on-surface-variant">
-            Demo order summary • Not a live invoice
+            Order summary • Cash on Delivery
           </p>
         </div>
 
         <div className="no-print flex items-center justify-center gap-space-xs py-space-sm">
           <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-secondary" />
           <span className="text-label-sm uppercase tracking-widest text-secondary">
-            Demo storefront • Order preview
+            Order confirmed • Cash on Delivery
           </span>
           <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-secondary" />
         </div>
@@ -200,14 +200,15 @@ export function ConfirmationView() {
             Order Confirmed
           </p>
           <h1 className="mt-1 font-display text-[2rem] leading-tight tracking-tight text-on-surface sm:text-display-md">
-            Your Demo Order Has Been Placed!
+            Your Order Has Been Placed!
           </h1>
           <p className="mx-auto mt-2 max-w-2xl text-body-lg leading-relaxed text-on-surface-variant">
-            Thank you for exploring {BRAND_NAME}. This is a demo confirmation:
-            no payment has been collected and no fountain will be dispatched.
+            Thank you for your order. We will call you shortly to
+            confirm your delivery details � payment is collected in cash when
+            your order arrives.
           </p>
           <p className="mx-auto mt-3 inline-flex rounded-full bg-secondary-container px-3 py-1 text-label-sm font-semibold uppercase tracking-wider text-on-secondary-container">
-            Demo order only • Nothing will be charged or shipped
+            Cash on Delivery • Pay when your order arrives
           </p>
         </div>
 
@@ -248,7 +249,7 @@ export function ConfirmationView() {
                 {order.paymentMethod}
               </span>
               <span className="text-label-sm font-semibold text-primary">
-                {formatPrice(order.total)} demo total
+                {formatPrice(order.total)} due on delivery
               </span>
             </div>
           </div>
@@ -367,7 +368,7 @@ export function ConfirmationView() {
                 <div className="mt-space-md pl-7">
                   <div className="inline-flex items-center gap-2 rounded bg-surface-container px-3 py-1.5 text-label-sm text-on-surface">
                     <WavesIcon size={16} className="text-primary" />
-                    Demo order • free nationwide delivery
+                    Cash on Delivery • free nationwide delivery
                   </div>
                 </div>
               </div>
@@ -397,7 +398,7 @@ export function ConfirmationView() {
                         Total Payable
                       </span>
                       <p className="text-label-sm text-on-surface-variant">
-                        Demo only — nothing to pay
+                        Pay on delivery
                       </p>
                     </div>
                     <span className="price font-display text-headline-lg font-bold text-primary">
@@ -420,8 +421,8 @@ export function ConfirmationView() {
                 What Happens Next?
               </h2>
               <p className="text-body-sm text-on-surface-variant">
-                A real order would move through these studio steps. This demo stops
-                at the confirmation preview.
+                Your order will move through
+                these steps:
               </p>
             </div>
           </div>
@@ -443,7 +444,7 @@ export function ConfirmationView() {
                 </p>
               </div>
               <p className="mt-space-md text-label-sm text-on-surface-variant">
-                Not started in this demo
+                We will call you to confirm
               </p>
             </div>
             <div className="flex flex-col justify-between rounded-lg bg-surface p-space-md">
@@ -463,7 +464,7 @@ export function ConfirmationView() {
                 </p>
               </div>
               <p className="mt-space-md text-label-sm text-on-surface-variant">
-                Not started in this demo
+                We will call you to confirm
               </p>
             </div>
             <div className="flex flex-col justify-between rounded-lg bg-surface p-space-md">
@@ -483,7 +484,7 @@ export function ConfirmationView() {
                 </p>
               </div>
               <p className="mt-space-md text-label-sm text-on-surface-variant">
-                Not scheduled in this demo
+                Cash payment on arrival
               </p>
             </div>
           </div>
@@ -503,19 +504,19 @@ export function ConfirmationView() {
             className="btn btn-soft w-full px-8 sm:w-auto"
           >
             <PrinterIcon size={18} />
-            Print Invoice / Care Summary
+            Print Order Summary
           </button>
         </div>
 
         <div className="no-print rounded-xl bg-surface-container-low p-space-md text-center shadow-sm">
           <p className="font-display text-headline-sm text-on-surface">
-            About this demo confirmation
+            About this order
           </p>
           <p className="mx-auto mt-1 max-w-2xl text-body-sm leading-relaxed text-on-surface-variant">
-            This demo order is stored in {BRAND_NAME}&apos;s database and appears in
-            the admin panel. No payment, courier booking, email, or SMS has been
-            created. Support and tracking are not shown because this storefront
-            has no live fulfilment destination.
+            Your order is saved to your
+            account and visible in the studio admin panel. No payment has been
+            taken � we call you to confirm delivery, and cash is collected when
+            your order arrives.
           </p>
         </div>
       </div>

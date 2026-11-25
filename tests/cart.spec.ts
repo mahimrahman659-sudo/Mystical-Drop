@@ -164,12 +164,12 @@ test("a rejected price change refreshes the checkout total and keeps the cart", 
       { $set: { price: 5000 } },
     );
 
-  await page.getByRole("button", { name: /Place Demo Order/ }).click();
+  await page.getByRole("button", { name: /Place Order/ }).click();
   await expect(page.getByText(/price of one or more fountains has changed/i)).toBeVisible({
     timeout: 30_000,
   });
   await expect(
-    page.getByRole("button", { name: /Place Demo Order \(৳5,000\)/ }),
+    page.getByRole("button", { name: /Place Order \(৳5,000\)/ }),
   ).toBeVisible({ timeout: 15_000 });
   expect(await db.collection("orders").countDocuments()).toBe(0);
   await expect(
@@ -205,7 +205,7 @@ test("an interrupted checkout response is idempotent after reload", async ({ pag
     await route.continue();
   });
 
-  await page.getByRole("button", { name: /Place Demo Order/ }).click();
+  await page.getByRole("button", { name: /Place Order/ }).click();
   const db = await getTestDb();
   await expect
     .poll(() => db.collection("orders").countDocuments(), { timeout: 30_000 })
@@ -214,10 +214,10 @@ test("an interrupted checkout response is idempotent after reload", async ({ pag
   await page.reload();
   await waitForAppReady(page);
   await fillCheckout(page, customer);
-  await page.getByRole("button", { name: /Place Demo Order/ }).click();
+  await page.getByRole("button", { name: /Place Order/ }).click();
   await page.waitForURL("**/order-confirmation", { timeout: 60_000 });
   await expect(
-    page.getByRole("heading", { name: "Your Demo Order Has Been Placed!" }),
+    page.getByRole("heading", { name: "Your Order Has Been Placed!" }),
   ).toBeVisible();
   expect(await db.collection("orders").countDocuments()).toBe(1);
 });
@@ -250,7 +250,7 @@ test("two tabs submit the first checkout attempt simultaneously", async ({
 
     for (const page of [firstPage, secondPage]) {
       await expect(
-        page.getByRole("button", { name: /Place Demo Order/ }),
+        page.getByRole("button", { name: /Place Order/ }),
       ).toBeVisible();
       await fillCheckout(page, {
         fullName: `Two Tab Shopper ${attempt}`,
@@ -307,7 +307,7 @@ test("two tabs submit the first checkout attempt simultaneously", async ({
     const confirmationReferences = await Promise.all(
       [firstPage, secondPage].map(async (page) => {
         await expect(
-          page.getByRole("heading", { name: "Your Demo Order Has Been Placed!" }),
+          page.getByRole("heading", { name: "Your Order Has Been Placed!" }),
         ).toBeVisible();
         const text = await page.locator("body").innerText();
         return text.match(/#TNV-\d{5}/)?.[0] ?? "";
@@ -339,7 +339,7 @@ test("a genuinely new purchase creates a second order", async ({ page }) => {
   await page.getByRole("link", { name: "Proceed to Checkout" }).click();
   await waitForAppReady(page);
   await fillCheckout(page, customer);
-  await page.getByRole("button", { name: /Place Demo Order/ }).click();
+  await page.getByRole("button", { name: /Place Order/ }).click();
   await page.waitForURL("**/order-confirmation", { timeout: 60_000 });
 
   await page.getByRole("link", { name: "Continue Shopping" }).click();
@@ -349,10 +349,10 @@ test("a genuinely new purchase creates a second order", async ({ page }) => {
   await page.getByRole("link", { name: "Proceed to Checkout" }).click();
   await waitForAppReady(page);
   await fillCheckout(page, customer);
-  await page.getByRole("button", { name: /Place Demo Order/ }).click();
+  await page.getByRole("button", { name: /Place Order/ }).click();
   await page.waitForURL("**/order-confirmation", { timeout: 60_000 });
   await expect(
-    page.getByRole("heading", { name: "Your Demo Order Has Been Placed!" }),
+    page.getByRole("heading", { name: "Your Order Has Been Placed!" }),
   ).toBeVisible();
 
   const db = await getTestDb();

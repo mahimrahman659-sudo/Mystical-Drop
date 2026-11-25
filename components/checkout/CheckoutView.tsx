@@ -15,7 +15,6 @@ import { useCart } from "@/components/cart/CartProvider";
 import { useCatalog } from "@/components/catalog/CatalogProvider";
 import {
   ArrowLeftIcon,
-  CardIcon,
   CheckIcon,
   ChevronDownIcon,
   InfoIcon,
@@ -223,11 +222,12 @@ export function CheckoutView() {
     submittingRef.current = true;
     setSubmitting(true);
     setSubmitError(null);
-    let attemptKey = submissionKey;
-    if (!attemptKey) {
-      attemptKey = ensureCheckoutSubmissionKey(cartSignature);
-      setSubmissionKey(attemptKey);
-    }
+    // Resolve the idempotency key at submit time, not from mount-time state:
+    // two tabs opened together can latch different UUIDs at mount, while only
+    // one survives in localStorage. Re-reading here makes both tabs converge
+    // on the same stored key so a duplicate submit returns the first order.
+    const attemptKey = ensureCheckoutSubmissionKey(cartSignature);
+    if (attemptKey !== submissionKey) setSubmissionKey(attemptKey);
 
     try {
       const response = await fetch("/api/orders", {
@@ -268,7 +268,7 @@ export function CheckoutView() {
         }
         throw new Error(
           payload?.message ||
-            "We could not place the demo order. Your cart and details are still here, so you can try again.",
+            "We could not place your order. Your cart and details are still here, so you can try again.",
         );
       }
 
@@ -295,7 +295,7 @@ export function CheckoutView() {
       setSubmitError(
         error instanceof Error && error.message
           ? error.message
-          : "We could not place the demo order. Your cart and details are still here, so you can try again.",
+          : "We could not place your order. Your cart and details are still here, so you can try again.",
       );
     }
   }
@@ -379,19 +379,18 @@ export function CheckoutView() {
             </span>
             <div>
               <p className="text-label-md font-semibold uppercase tracking-wider text-secondary">
-                Demo checkout • Cash on Delivery
+                Cash on Delivery • Pay when your order arrives
               </p>
               <p className="mt-1 text-body-sm leading-relaxed text-on-surface">
-                This storefront is not connected to a payment or fulfilment
-                service. Submitting will not send an order to the store, charge
-                you, or collect card details.
+                Payment is collected in cash when your order is delivered —
+                nothing is paid online, and no card details are ever requested.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 self-start rounded bg-surface-container-lowest/70 px-3 py-2 text-on-surface-variant sm:self-center">
             <span aria-hidden="true" className="h-2 w-2 rounded-full bg-secondary" />
             <span className="text-label-sm uppercase tracking-wider">
-              Demo order preview
+              Order details
             </span>
           </div>
         </div>
@@ -496,7 +495,7 @@ export function CheckoutView() {
                       id="email-hint"
                       className="mt-1 text-label-sm text-on-surface-variant"
                     >
-                      For order records about this demo order.
+                      For your order records.
                     </p>
                   ) : null}
                   <FieldError field="email" errors={errors} />
@@ -652,81 +651,26 @@ export function CheckoutView() {
                       <span className="flex flex-wrap items-center gap-2 font-display text-headline-sm text-on-surface">
                         Cash on Delivery (COD)
                         <span className="rounded-full bg-secondary-container px-2 py-0.5 font-sans text-label-sm uppercase text-on-secondary-container">
-                          Demo only
+                          Pay on arrival
                         </span>
                       </span>
                       <LockIcon size={18} className="text-primary" />
                     </span>
                     <span className="mt-1 block text-body-sm leading-relaxed text-on-surface-variant">
-                      A demo order preview. No cash, bKash, or card payment will be
-                      collected or requested.
+                      Payment is collected in cash when your order is delivered.
+                      Nothing is paid online.
                     </span>
                     <span className="mt-2 flex items-center gap-2 text-label-sm text-secondary">
                       <InfoIcon size={14} />
-                      No advance payment is collected in this storefront demo.
+                      No advance payment is required.
                     </span>
                   </span>
                 </label>
 
-                <label
-                  aria-disabled="true"
-                  className="flex cursor-not-allowed items-start gap-3 rounded-lg bg-surface-container-lowest p-space-md opacity-65 shadow-sm"
-                >
-                  <span className="mt-0.5 flex h-5 items-center">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="mfs"
-                      disabled
-                      className="h-4 w-4 accent-primary"
-                    />
-                  </span>
-                  <span className="flex-1">
-                    <span className="flex items-start justify-between gap-2">
-                      <span className="flex flex-wrap items-center gap-2 font-display text-headline-sm text-on-surface">
-                        bKash / Nagad Instant Mobile Payment
-                        <span className="rounded bg-surface-container-high px-2 py-0.5 font-sans text-label-sm text-on-surface-variant">
-                          Unavailable
-                        </span>
-                      </span>
-                      <PhoneIcon size={18} className="text-on-surface-variant" />
-                    </span>
-                    <span className="mt-1 block text-body-sm text-on-surface-variant">
-                      Not connected in this demo. No mobile banking integration is
-                      available.
-                    </span>
-                  </span>
-                </label>
-
-                <label
-                  aria-disabled="true"
-                  className="flex cursor-not-allowed items-start gap-3 rounded-lg bg-surface-container-lowest p-space-md opacity-65 shadow-sm"
-                >
-                  <span className="mt-0.5 flex h-5 items-center">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="card"
-                      disabled
-                      className="h-4 w-4 accent-primary"
-                    />
-                  </span>
-                  <span className="flex-1">
-                    <span className="flex items-start justify-between gap-2">
-                      <span className="flex flex-wrap items-center gap-2 font-display text-headline-sm text-on-surface">
-                        Credit / Debit Card
-                        <span className="rounded bg-surface-container-high px-2 py-0.5 font-sans text-label-sm text-on-surface-variant">
-                          Unavailable
-                        </span>
-                      </span>
-                      <CardIcon size={18} className="text-on-surface-variant" />
-                    </span>
-                    <span className="mt-1 block text-body-sm text-on-surface-variant">
-                      Card processing is not connected. This demo never collects
-                      card numbers or payment credentials.
-                    </span>
-                  </span>
-                </label>
+                <p className="flex items-center gap-2 rounded-lg bg-surface-container-lowest p-space-sm text-label-sm text-on-surface-variant">
+                  <InfoIcon size={14} className="shrink-0 text-outline" />
+                  Online payments (bKash, Nagad, cards) will be added later.
+                </p>
               </div>
             </fieldset>
 
@@ -746,13 +690,13 @@ export function CheckoutView() {
               >
                 <LockIcon size={20} />
                 {submitting
-                  ? "Placing demo order…"
-                  : `Place Demo Order (${formatPrice(total)})`}
+                  ? "Placing your order…"
+                  : `Place Order (${formatPrice(total)})`}
               </button>
               <p className="mx-auto max-w-xl text-center text-body-sm leading-relaxed text-on-surface-variant">
-                This is a demo order. By submitting, you agree that the storefront
-                will show a confirmation preview only. No payment, fulfilment, or
-                delivery will occur.
+                By placing this order, you request delivery of these items and
+                confirm your contact details are correct. Payment is collected
+                in cash on delivery.
               </p>
             </div>
           </form>
@@ -858,10 +802,11 @@ export function CheckoutView() {
                 <div className="mt-space-sm rounded-lg bg-surface-container-low px-3 py-2.5">
                   <p className="flex items-center gap-2 text-label-sm font-semibold uppercase tracking-wider text-secondary">
                     <LockIcon size={15} />
-                    Cash on Delivery (demo)
+                    Cash on Delivery
                   </p>
                   <p className="mt-1 text-body-sm leading-relaxed text-on-surface-variant">
-                    {FREE_SHIPPING.detail}. No payment is collected online.
+                    {FREE_SHIPPING.detail}. Payment is collected in cash on
+                    delivery.
                   </p>
                 </div>
 
@@ -877,8 +822,8 @@ export function CheckoutView() {
                     },
                     {
                       icon: <ShieldIcon size={17} />,
-                      title: "Demo checkout",
-                      body: "No payment is collected and nothing is shipped from this demo storefront.",
+                      title: "Cash on Delivery",
+                      body: "Pay in cash when your order arrives — we call to confirm your order and delivery address first.",
                     },
                   ].map((pledge) => (
                     <div key={pledge.title} className="flex items-start gap-2">

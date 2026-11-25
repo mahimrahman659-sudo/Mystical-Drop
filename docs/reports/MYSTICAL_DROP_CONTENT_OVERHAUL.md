@@ -1,6 +1,6 @@
 # Mystical Drop â€” Content Overhaul Record
 
-**Date:** 2026-11-24 Â· Every customer-facing surface reviewed; claims limited to verifiable statements.
+**Updated:** 2026-11-25 Â· Customer-facing copy rewritten for the real Cash on Delivery launch (see Â§10).
 
 ---
 
@@ -55,3 +55,15 @@ Removed "Acoustic calibration setup" and "COD processing fee" line items; steps 
 ## 9. Flagged for owner (not changed)
 
 Privacy policy publication approval Â· support email Â· Terms page Â· free-shipping policy confirmation Â· whether "Artisanal Pieces Ordered" wording on confirmations should change (kept â€” tests + not a factual claim).
+
+## 10. Cash on Delivery made production-ready (2026-11-25)
+
+All "demo" framing removed from the order lifecycle; checkout now places real COD orders:
+
+- **Order records:** `paymentMethod: "Cash on Delivery"` (was "Cash on Delivery (demo)"), `demo` field removed entirely (0 historical orders existed — no migration), status-history note "Order placed via Cash on Delivery checkout."
+- **Checkout page:** banner now explains real COD terms (pay on arrival, no online payment, no card details); payment section shows COD only with "Online payments (bKash, Nagad, cards) will be added later" (dead disabled radios removed); submit button "Place Order (?…)"; consent text requests delivery with cash payment on arrival.
+- **Confirmation page:** "Your Order Has Been Placed!" — real next-steps (we call to confirm; cash payment on arrival), "due on delivery" totals, delivery estimate "Confirmed by phone — We call to arrange delivery after your order" (no invented carrier SLA), print = "Order Summary".
+- **Cart / footer / account / admin:** COD-only payment presentation, "Pay in cash when your order arrives" wording, account + admin order badges show "COD", admin payment-state card = "Cash on Delivery — Collected on delivery", stats renamed `demoOrders ? codOrders`.
+- **Privacy policy:** factual demo references updated to the real COD flow (still an owner-approval draft for legal identity).
+- **Bug fixed en route:** two tabs mounting checkout simultaneously could latch different idempotency keys (both created orders). The submission key is now resolved at submit time, so concurrent tabs converge on the stored key — covered by the two-tab E2E test.
+- **Verification:** tsc + lint clean; E2E **36/36 passed** (order placement, confirmation, print, admin transitions, two-tab idempotency all green).

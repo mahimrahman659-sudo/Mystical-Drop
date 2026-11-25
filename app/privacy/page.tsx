@@ -39,7 +39,7 @@ export default function PrivacyPage() {
           <p>
             This policy explains what information {BRAND_NAME} collects, why we
             collect it, and the choices available to customers. {BRAND_NAME} is a
-            demo storefront for handcrafted tabletop water fountains. The legal
+            storefront for decorative tabletop water fountains. The legal
             business identity and registered business address have not yet been
             supplied by the owner.
           </p>
@@ -93,9 +93,10 @@ export default function PrivacyPage() {
               linked to an account.
             </p>
             <p className="mt-2">
-              This storefront uses a demo Cash on Delivery flow. It does not
-              collect card numbers, bKash or Nagad credentials, or other payment
-              credentials. Guest confirmation access tokens are stored as hashes
+              This storefront uses a Cash on Delivery flow. It does not collect
+              card numbers, bKash or Nagad credentials, or other payment
+              credentials — payment is collected in cash when your order is
+              delivered. Guest confirmation access tokens are stored as hashes
               rather than plain tokens.
             </p>
 
@@ -127,7 +128,7 @@ export default function PrivacyPage() {
             <ul className="mt-3 list-disc space-y-2 pl-5">
               <li>Create and secure customer accounts and sign customers in.</li>
               <li>Send verification and password-recovery messages.</li>
-              <li>Record, confirm, and manage demo orders and delivery details.</li>
+              <li>Record, confirm, and manage orders and delivery details.</li>
               <li>Respond to customer questions and privacy requests.</li>
               <li>Prevent abuse, secure the admin area, and maintain service reliability.</li>
               <li>Meet legal, accounting, and record-keeping obligations where applicable.</li>

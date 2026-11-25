@@ -76,7 +76,6 @@ export type OrderConfirmation = {
   total: number;
   paymentMethod: string;
   paymentStatus: PaymentStatus;
-  demo: true;
   fulfillmentStatus: FulfillmentStatus;
   statusHistory: CustomerOrderStatusEvent[];
   deliveryEstimate: string;
@@ -110,8 +109,8 @@ export function fulfillmentEstimate(): {
   deliveryEstimateNote: string;
 } {
   return {
-    deliveryEstimate: "Not scheduled",
-    deliveryEstimateNote: "Demo preview — no delivery is arranged",
+    deliveryEstimate: "Confirmed by phone",
+    deliveryEstimateNote: "We call to arrange delivery after your order",
   };
 }
 

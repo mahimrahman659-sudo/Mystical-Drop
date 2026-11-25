@@ -203,7 +203,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                             {FULFILLMENT_LABELS[order.fulfillmentStatus]}
                           </span>
                           <span className="rounded-full bg-surface-container px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-on-surface-variant">
-                            Demo
+                            COD
                           </span>
                         </div>
                         <p className="mt-1 text-body-sm text-on-surface-variant">
@@ -230,8 +230,8 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           <div className="mt-4 flex items-start gap-3 rounded-xl bg-surface-container-low p-4">
             <SparkleIcon size={18} className="mt-0.5 shrink-0 text-primary" />
             <p className="text-body-sm leading-relaxed text-on-surface-variant">
-              These are demo Cash on Delivery orders. No payment has been
-              collected and no dispatch is scheduled.
+              These are Cash on Delivery orders. Payment is collected when your
+              order arrives, and we call to confirm delivery first.
             </p>
           </div>
         </div>

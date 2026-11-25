@@ -415,26 +415,17 @@ export function CartView() {
                 <span className="rounded bg-surface-container px-2.5 py-1 text-label-sm font-medium text-on-surface">
                   Cash on Delivery
                 </span>
-                {["bKash", "Nagad", "Visa", "Mastercard"].map((method) => (
-                  <span
-                    key={method}
-                    className="rounded bg-surface-container/50 px-2.5 py-1 text-label-sm text-on-surface-variant"
-                    title="Unavailable in this demo"
-                  >
-                    {method}
-                    <span className="sr-only"> (unavailable in this demo)</span>
-                  </span>
-                ))}
               </div>
               <p className="text-center text-label-sm text-on-surface-variant">
-                Online payments are not connected in this demo.
+                Pay in cash when your order arrives. Online payments (bKash,
+                Nagad, cards) coming later.
               </p>
             </div>
 
             <div className="flex items-center gap-space-xs rounded bg-surface-container-low p-space-sm">
               <WavesIcon size={19} className="shrink-0 text-secondary" />
               <p className="text-label-sm leading-4 text-on-surface-variant">
-                This storefront runs a demo checkout — no payment is collected.
+                Cash on Delivery — payment is collected when your order arrives.
               </p>
             </div>
           </div>

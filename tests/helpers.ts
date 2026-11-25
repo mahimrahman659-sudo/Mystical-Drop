@@ -315,11 +315,11 @@ export async function fillCheckout(page: Page, customer: CheckoutCustomer): Prom
   }
 }
 
-export async function submitDemoOrder(page: Page): Promise<void> {
-  await page.getByRole("button", { name: /Place Demo Order/ }).click();
+export async function submitOrder(page: Page): Promise<void> {
+  await page.getByRole("button", { name: /Place Order/ }).click();
   await page.waitForURL("**/order-confirmation", { timeout: 60_000 });
   await expect(
-    page.getByRole("heading", { name: "Your Demo Order Has Been Placed!" }),
+    page.getByRole("heading", { name: "Your Order Has Been Placed!" }),
   ).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("Artisanal Pieces Ordered")).toBeVisible({
     timeout: 30_000,

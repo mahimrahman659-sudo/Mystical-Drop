@@ -33,7 +33,6 @@ export type OrderDocument = {
   total: number;
   paymentMethod: string;
   paymentStatus: PaymentStatus;
-  demo: true;
   fulfillmentStatus: FulfillmentStatus;
   statusHistory: OrderStatusEvent[];
   confirmationTokenHash: string;
@@ -244,16 +243,15 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
       subtotal,
       shipping,
       total,
-      paymentMethod: "Cash on Delivery (demo)",
+      paymentMethod: "Cash on Delivery",
       paymentStatus: "not_collected",
-      demo: true,
       fulfillmentStatus: "pending",
       statusHistory: [
         {
           status: "pending",
           changedAt: now.toISOString(),
           changedBy: null,
-          note: "Order created in demo checkout.",
+          note: "Order placed via Cash on Delivery checkout.",
         },
       ],
       confirmationTokenHash: tokenHash(accessToken),
@@ -303,7 +301,6 @@ export function toOrderConfirmation(order: OrderDocument): OrderConfirmation {
     total: order.total,
     paymentMethod: order.paymentMethod,
     paymentStatus: order.paymentStatus,
-    demo: true,
     fulfillmentStatus: order.fulfillmentStatus,
     statusHistory: order.statusHistory.map(({ status, changedAt }) => ({
       status,
@@ -396,16 +393,18 @@ export async function getAdminOrder(orderId: string): Promise<OrderDocument | nu
 
 export async function getAdminOrderStats(): Promise<{
   totalOrders: number;
-  demoOrders: number;
+  codOrders: number;
   awaitingAction: number;
   activeProducts: number;
   recentOrders: OrderDocument[];
 }> {
   const db = getDb();
-  const [totalOrders, demoOrders, awaitingAction, activeProducts, recentOrders] =
+  const [totalOrders, codOrders, awaitingAction, activeProducts, recentOrders] =
     await Promise.all([
       db.collection(ORDER_COLLECTION).countDocuments(),
-      db.collection(ORDER_COLLECTION).countDocuments({ demo: true }),
+      db.collection(ORDER_COLLECTION).countDocuments({
+        paymentMethod: "Cash on Delivery",
+      }),
       db.collection(ORDER_COLLECTION).countDocuments({
         fulfillmentStatus: { $in: ["pending", "confirmed"] },
       }),
@@ -418,7 +417,7 @@ export async function getAdminOrderStats(): Promise<{
         .toArray(),
     ]);
 
-  return { totalOrders, demoOrders, awaitingAction, activeProducts, recentOrders };
+  return { totalOrders, codOrders, awaitingAction, activeProducts, recentOrders };
 }
 
 export async function updateOrderStatus(input: {

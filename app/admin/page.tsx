@@ -61,7 +61,7 @@ export default async function AdminOverviewPage() {
             {stats.totalOrders}
           </p>
           <p className="mt-1 text-label-sm text-on-surface-variant">
-            {stats.demoOrders} demo COD
+            {stats.codOrders} Cash on Delivery
           </p>
         </div>
         <div className="rounded-lg border border-on-surface/[0.05] bg-surface-container-lowest p-4 shadow-sm">
@@ -91,10 +91,10 @@ export default async function AdminOverviewPage() {
             Payment state
           </p>
           <p className="mt-1 font-display text-headline-sm text-on-surface">
-            COD demo
+            Cash on Delivery
           </p>
           <p className="mt-1 text-label-sm text-on-surface-variant">
-            Payment is not collected
+            Collected on delivery
           </p>
         </div>
       </div>
@@ -144,7 +144,7 @@ export default async function AdminOverviewPage() {
                         {FULFILLMENT_LABELS[order.fulfillmentStatus]}
                       </span>
                       <span className="rounded-full bg-surface-container px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-on-surface-variant">
-                        Demo
+                        COD
                       </span>
                     </div>
                     <p className="mt-1 text-body-sm text-on-surface-variant">

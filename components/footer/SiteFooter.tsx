@@ -106,9 +106,8 @@ export async function SiteFooter() {
               Checkout
             </h2>
             <p className="max-w-xs text-body-sm leading-relaxed text-on-surface-variant">
-              This storefront runs a demo checkout with Cash on Delivery across
-              Bangladesh. No payment is collected online, and ordering opens
-              once prices are announced.
+              Cash on Delivery across Bangladesh — pay when your order arrives.
+              We call to confirm your order and delivery address first.
             </p>
             <div className="pt-space-xs">
               <p className="mb-space-xs text-label-sm uppercase tracking-wider text-on-surface-variant">
@@ -118,19 +117,12 @@ export async function SiteFooter() {
                 <span className="rounded bg-surface px-2 py-1 text-label-sm text-on-surface">
                   Cash on Delivery
                 </span>
-                {["bKash", "Nagad", "Visa", "Mastercard"].map((method) => (
-                  <span
-                    key={method}
-                    className="rounded bg-surface/60 px-2 py-1 text-label-sm text-on-surface-variant"
-                    title="Not available in this demo"
-                  >
-                    {method}
-                    <span className="sr-only"> (unavailable in this demo)</span>
-                  </span>
-                ))}
+                <span className="rounded bg-surface/60 px-2 py-1 text-label-sm text-on-surface-variant">
+                  bKash, Nagad &amp; cards — coming later
+                </span>
               </div>
               <p className="mt-2 text-label-sm text-on-surface-variant">
-                Demo storefront • Cash on Delivery only
+                Free nationwide delivery on every order
               </p>
             </div>
           </div>
@@ -138,7 +130,7 @@ export async function SiteFooter() {
 
         <div className="flex flex-col items-center justify-between gap-space-sm border-t border-outline-variant/30 pt-space-lg sm:flex-row">
           <p className="text-center text-label-sm leading-5 text-on-surface-variant sm:text-left">
-            © 2026 {BRAND_NAME}. Original designs by our team. Demo storefront.
+            © 2026 {BRAND_NAME}. Original designs by our team.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-space-md gap-y-1">
             <Link

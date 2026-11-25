@@ -53,7 +53,7 @@ test("operator promotion is idempotent and admin boundaries are enforced", async
   await page.goto("/admin");
   await expect(page).toHaveTitle("Overview • Mystical Drop");
   await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
-  await expect(page.getByText("Payment is not collected")).toBeVisible();
+  await expect(page.getByText("Collected on delivery")).toBeVisible();
 
   await createVerifiedUserDirect(request, {
     name: "Normal Customer",

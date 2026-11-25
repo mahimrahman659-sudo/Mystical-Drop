@@ -162,7 +162,7 @@ test("empty cart is rendered from live catalog availability", async ({ page }) =
 
   await page.goto("/checkout");
   await expect(page.getByRole("heading", { name: "Your cart is empty" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Place Demo Order/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Place Order/ })).toHaveCount(0);
 
   const missing = await page.goto("/products/not-a-fountain");
   expect(missing?.status()).toBe(404);
@@ -284,7 +284,7 @@ test("storefront pages fit every viewport with real images and confirmed order",
       { path: "/products/fountain-01", heading: /Rustic Miniature Well Fountain/ },
       { path: "/cart", heading: /Your Peaceful Cart/ },
       { path: "/checkout", heading: /Checkout/ },
-      { path: "/order-confirmation", heading: /Your Demo Order Has Been Placed/ },
+      { path: "/order-confirmation", heading: /Your Order Has Been Placed/ },
     ];
 
     for (const route of routes) {
