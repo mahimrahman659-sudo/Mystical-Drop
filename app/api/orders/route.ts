@@ -4,6 +4,7 @@ import { getSessionUser } from "@/lib/auth/session";
 import { getBaseUrl } from "@/lib/auth/server";
 import { validateCheckout } from "@/lib/checkout";
 import { createOrder, OrderError } from "@/lib/db/orders";
+import { sendOrderEmails } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -98,6 +99,13 @@ export async function POST(request: Request) {
       userEmail: user?.email ?? null,
     });
 
+    // Notifications are fire-and-forget and only run for a freshly created
+    // order: an email failure must never fail this response, and an
+    // idempotent replay (created=false) must never resend them.
+    if (result.created) {
+      void sendOrderEmails(result.order).catch(() => undefined);
+    }
+
     return NextResponse.json(
       { order: result.order, accessToken: result.accessToken },
       {
@@ -116,7 +124,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message:
-          "We could not save the demo order. Your cart is still intact. Please try again shortly.",
+          "We could not save your order. Your cart is still intact. Please try again shortly.",
       },
       { status: 500 },
     );

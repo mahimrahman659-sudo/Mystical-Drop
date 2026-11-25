@@ -103,7 +103,9 @@ function isDuplicateKeyError(error: unknown): error is {
 }
 
 async function freshReference(): Promise<string> {
-  return `TNV-${randomInt(10000, 100000)}`;
+  // New orders use the MD- prefix. Historical TNV- references remain valid
+  // everywhere references are stored, displayed, or searched.
+  return `MD-${randomInt(10000, 100000)}`;
 }
 
 function selectionSignature(
@@ -228,7 +230,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
   const orderId = new ObjectId();
   const accessToken = orderAccessToken(orderId.toHexString(), input.submissionKey);
   const now = new Date();
-    const delivery = fulfillmentEstimate();
+  const delivery = fulfillmentEstimate();
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const order: OrderDocument = {
@@ -440,6 +442,12 @@ export async function updateOrderStatus(input: {
     note: `Status changed by ${input.admin.email}.`,
   };
 
+  // Cash on Delivery: marking the order delivered records that the cash was
+  // handed over at delivery. Nothing is collected for earlier or cancelled
+  // states, so paymentStatus only advances on this transition.
+  const paymentUpdate =
+    input.nextStatus === "delivered" ? { paymentStatus: "paid" as const } : {};
+
   const result = await getDb()
     .collection<OrderDocument>(ORDER_COLLECTION)
     .updateOne(
@@ -451,6 +459,7 @@ export async function updateOrderStatus(input: {
         $set: {
           fulfillmentStatus: input.nextStatus,
           updatedAt: new Date(),
+          ...paymentUpdate,
         },
         $push: { statusHistory },
       },

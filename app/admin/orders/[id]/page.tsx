@@ -8,6 +8,7 @@ import {
   FULFILLMENT_LABELS,
   formatOrderDate,
   nextFulfillmentStatuses,
+  paymentStatusLabel,
   type FulfillmentStatus,
 } from "@/lib/orders";
 import { formatDeliveryAddress } from "@/lib/checkout";
@@ -81,7 +82,7 @@ export default async function AdminOrderDetailPage({
             {FULFILLMENT_LABELS[order.fulfillmentStatus]}
           </span>
           <span className="rounded-full bg-surface-container px-3 py-1 text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant">
-            Demo COD
+            COD
           </span>
         </div>
       </div>
@@ -216,7 +217,9 @@ export default async function AdminOrderDetailPage({
                 </p>
                 <p>
                   <span className="text-on-surface-variant">Payment status:</span>{" "}
-                  <span className="text-on-surface">Not collected</span>
+                  <span className="text-on-surface">
+                    {paymentStatusLabel(order.paymentStatus)}
+                  </span>
                 </p>
                 <p>
                   <span className="text-on-surface-variant">Fulfilment status:</span>{" "}
@@ -298,8 +301,9 @@ export default async function AdminOrderDetailPage({
               </form>
             )}
             <p className="mt-4 border-t border-outline-variant/30 pt-3 text-label-sm leading-relaxed text-on-surface-variant">
-              Payment status is separate and is not changed by fulfilment. This is
-              a demo COD order, so no payment collection is recorded.
+              Payment is collected in cash on delivery. Marking an order as
+              delivered records the payment as received; earlier and cancelled
+              states keep it as not collected.
             </p>
           </div>
           <Link href="/admin/orders" className="btn btn-outline mt-3 w-full">

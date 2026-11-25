@@ -1,7 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import net from "node:net";
 import path from "node:path";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { expect, test, type APIRequestContext, type Browser } from "@playwright/test";
 import { MongoClient } from "mongodb";
 
@@ -220,5 +220,71 @@ test("production with unreachable SMTP does not fall back to the development mai
     await deliveryUnavailableChecks(browser, request, unreachable);
   } finally {
     await stopApp(unreachable);
+  }
+});
+
+test("placing an order succeeds when email delivery is unavailable", async ({
+  request,
+}) => {
+  const client = new MongoClient(uri);
+  await client.connect();
+  try {
+    const db = client.db(app!.dbName);
+    await db.collection("products").insertOne({
+      slug: "no-email-fountain",
+      name: "No Email Fountain",
+      shortName: "No Email",
+      price: 500,
+      catalogNumber: "77",
+      provenance: "Original Design",
+      flowLabel: "Test",
+      flowDescription: "Test flow used to verify order placement without email",
+      collectionLine: "Test line",
+      nativeName: "",
+      description:
+        "A fixture fountain verifying that order placement never depends on email delivery.",
+      longDescription:
+        "A fixture fountain verifying that order placement never depends on email delivery.",
+      features: [],
+      image: { src: "/images/fountain-01.jpg", alt: "Test fountain" },
+      cartImage: "/images/fountain-01.jpg",
+      gallery: [],
+      specs: [],
+      included: [],
+      status: "active",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    // This production app has no SMTP and the development mailbox is
+    // disabled, so both notification sends fail internally — the order
+    // must still be created and reported as successful exactly once.
+    const response = await request.post(`${app!.baseUrl}/api/orders`, {
+      headers: { Origin: app!.baseUrl },
+      data: {
+        submissionKey: randomUUID(),
+        customer: {
+          fullName: "No SMTP Shopper",
+          phone: "01712345678",
+          email: "no.smtp.order@example.com",
+          street: "House 3, Road 3, Uttara",
+          city: "Dhaka",
+          postalCode: "1230",
+          instructions: "",
+        },
+        items: [{ slug: "no-email-fountain", quantity: 1 }],
+        expectedTotal: 500,
+      },
+    });
+
+    expect(response.status()).toBe(201);
+    const payload = (await response.json()) as {
+      order: { reference: string };
+    };
+    expect(payload.order.reference).toMatch(/^MD-/);
+    expect(await db.collection("orders").countDocuments()).toBe(1);
+    expect(await db.collection("devMailbox").countDocuments()).toBe(0);
+  } finally {
+    await client.close();
   }
 });

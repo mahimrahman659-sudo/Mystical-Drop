@@ -26,6 +26,16 @@ export const ALLOWED_TRANSITIONS: Record<FulfillmentStatus, FulfillmentStatus[]>
 
 export type PaymentStatus = "not_collected" | "paid" | "refunded";
 
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  not_collected: "Not collected",
+  paid: "Paid on delivery",
+  refunded: "Refunded",
+};
+
+export function paymentStatusLabel(status: PaymentStatus): string {
+  return PAYMENT_STATUS_LABELS[status] ?? status;
+}
+
 export type OrderCustomer = {
   fullName: string;
   phone: string;

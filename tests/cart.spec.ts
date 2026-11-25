@@ -310,7 +310,7 @@ test("two tabs submit the first checkout attempt simultaneously", async ({
           page.getByRole("heading", { name: "Your Order Has Been Placed!" }),
         ).toBeVisible();
         const text = await page.locator("body").innerText();
-        return text.match(/#TNV-\d{5}/)?.[0] ?? "";
+        return text.match(/#(?:MD|TNV)-\d{5}/)?.[0] ?? "";
       }),
     );
     expect(confirmationReferences[0]).toBeTruthy();

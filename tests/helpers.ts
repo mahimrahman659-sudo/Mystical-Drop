@@ -66,9 +66,15 @@ export function capturedMails(): TestMail[] {
     });
 }
 
+export type TestMailKind =
+  | "verification"
+  | "password-reset"
+  | "order-confirmation"
+  | "order-alert";
+
 export async function latestMail(
   to: string,
-  kind: "verification" | "password-reset",
+  kind: TestMailKind,
 ): Promise<TestMail> {
   const mail = capturedMails()
     .filter(
@@ -83,7 +89,7 @@ export async function latestMail(
 
 export async function waitForMail(
   to: string,
-  kind: "verification" | "password-reset",
+  kind: TestMailKind,
 ): Promise<TestMail> {
   await expect
     .poll(async () => {

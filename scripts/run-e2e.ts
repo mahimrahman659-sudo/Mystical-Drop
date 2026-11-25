@@ -52,6 +52,7 @@ async function main() {
     SMTP_PORT: String(smtp.port),
     SMTP_SECURE: "false",
     SMTP_FROM: "Mystical Drop <no-reply@example.com>",
+    ORDER_ALERT_EMAIL: "orders-alert@example.com",
     E2E_SMTP_CAPTURE_FILE: captureFile,
     NEXT_TELEMETRY_DISABLED: "1",
   };

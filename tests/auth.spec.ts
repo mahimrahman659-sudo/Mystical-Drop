@@ -361,7 +361,7 @@ test("cart survives registration and login, order appears in account and admin",
   });
   await submitOrder(page);
   const confirmationText = await page.locator("body").innerText();
-  const reference = confirmationText.match(/#TNV-\d{5}/)?.[0].replace("#", "");
+  const reference = confirmationText.match(/#(?:MD|TNV)-\d{5}/)?.[0].replace("#", "");
   expect(reference).toBeTruthy();
 
   const db = await getTestDb();
@@ -434,7 +434,7 @@ test("guest confirmation is token-scoped and duplicate submissions create one or
   });
   await submitOrder(page);
 
-  const reference = (await page.locator("body").innerText()).match(/#TNV-\d{5}/)?.[0].replace("#", "")!;
+  const reference = (await page.locator("body").innerText()).match(/#(?:MD|TNV)-\d{5}/)?.[0].replace("#", "")!;
   const db = await getTestDb();
   const guestOrder = await db.collection("orders").findOne({ reference });
   expect(guestOrder?.userId).toBeNull();

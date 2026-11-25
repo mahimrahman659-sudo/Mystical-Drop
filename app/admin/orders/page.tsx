@@ -69,7 +69,7 @@ export default async function AdminOrdersPage({ searchParams }: OrdersPageProps)
             name="q"
             type="search"
             defaultValue={query}
-            placeholder="TNV-12345"
+            placeholder="MD-12345"
             className="field-input"
           />
         </div>
@@ -133,7 +133,7 @@ export default async function AdminOrdersPage({ searchParams }: OrdersPageProps)
                       {FULFILLMENT_LABELS[order.fulfillmentStatus]}
                     </span>
                     <span className="rounded-full bg-surface-container px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-on-surface-variant">
-                      Demo
+                      COD
                     </span>
                   </div>
                   <p className="mt-1 text-body-sm text-on-surface-variant">

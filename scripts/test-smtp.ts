@@ -31,9 +31,13 @@ export async function startTestSmtp(captureFile: string): Promise<{
               to: addressText(mail.to),
               subject,
               text: mail.text ?? "",
-              kind: /reset your mystical drop password/i.test(subject)
-                ? "password-reset"
-                : "verification",
+              kind: /new cod order/i.test(subject)
+                ? "order-alert"
+                : /is confirmed/i.test(subject)
+                  ? "order-confirmation"
+                  : /reset your mystical drop password/i.test(subject)
+                    ? "password-reset"
+                    : "verification",
               createdAt: new Date().toISOString(),
             })}\n`,
             "utf8",

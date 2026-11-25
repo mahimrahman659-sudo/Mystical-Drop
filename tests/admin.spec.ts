@@ -310,6 +310,17 @@ test("admin order search, filters, permitted transitions, and stale/invalid upda
   await page.getByRole("button", { name: "Forge transition" }).click();
   await page.waitForURL(/error=invalid/, { timeout: 30_000 });
 
+  // Deliver the first order: COD semantics record the payment as received.
+  await page.goto(firstUrl, { waitUntil: "load" });
+  await waitForAppReady(page);
+  await page.getByRole("button", { name: /Mark as Delivered/ }).click();
+  await page.waitForURL(/updated=1/, { timeout: 30_000 });
+  const delivered = await db
+    .collection("orders")
+    .findOne({ reference: first.reference });
+  expect(delivered?.fulfillmentStatus).toBe("delivered");
+  expect(delivered?.paymentStatus).toBe("paid");
+
   await page.goto(secondUrl, { waitUntil: "load" });
   await waitForAppReady(page);
   await page.getByRole("button", { name: "Cancel order" }).click();

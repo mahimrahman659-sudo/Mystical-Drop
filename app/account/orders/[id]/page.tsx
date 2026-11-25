@@ -14,6 +14,7 @@ import { getOrderForCustomer } from "@/lib/db/orders";
 import {
   FULFILLMENT_LABELS,
   formatOrderDate,
+  paymentStatusLabel,
   type FulfillmentStatus,
 } from "@/lib/orders";
 import { formatDeliveryAddress } from "@/lib/checkout";
@@ -83,10 +84,10 @@ export default async function AccountOrderPage({ params }: OrderPageProps) {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-label-sm uppercase tracking-wider text-on-surface-variant">
                 <PackageIcon size={17} />
-                Demo Cash on Delivery order
+                Cash on Delivery order
               </div>
               <span className="text-label-sm text-on-surface-variant">
-                Payment: not collected
+                Payment: {paymentStatusLabel(order.paymentStatus)}
               </span>
             </div>
           </div>
@@ -203,8 +204,9 @@ export default async function AccountOrderPage({ params }: OrderPageProps) {
                   </div>
                 </dl>
                 <p className="mt-2 text-label-sm text-on-surface-variant">
-                  Payment is recorded separately from fulfilment. This demo order
-                  has no payment collected.
+                  Payment is collected in cash when your order is delivered.
+                  This page reflects the payment once your order is marked
+                  delivered.
                 </p>
               </div>
             </div>
