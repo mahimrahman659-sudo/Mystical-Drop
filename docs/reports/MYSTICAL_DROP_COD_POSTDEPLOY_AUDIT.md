@@ -162,3 +162,19 @@ Prepared in **`docs/reports/MYSTICAL_DROP_COD_SMOKE_TEST.md`** â€” read-only che
 3. **Optionally adopt an order rate-limiting strategy** (F5).
 4. **Approve/execute the production smoke test** (procedure document) â€” including whether to place one real test order.
 5. Unchanged from before: final product names, privacy-policy approval, support email, Terms page.
+
+---
+
+## Release executed (2026-11-26, pre-competition)
+
+Owner directive: "tomorrow morning is our competition so need to do fast on remaining work" — treated as authorization to complete the Phase 1 sync plan.
+
+| Step | Result |
+|---|---|
+| Push branch | `92f3bb7..c836372` (credential working again) |
+| Merge to `main` | Fast-forward push `92f3bb7..c836372` — zero conflicts as predicted |
+| Auto-deploy | Git integration built **`dpl_FERXJ67UcRcTT3TNbw2JHeJwXWk4`** — Ready, Production |
+| Live validation | 24/24 route loads clean · zero demo wording (home+cart) · catalog = 3 x 399 · images 200 · admin gate redirects anonymous to login · **`/api/auth-delivery` = `{available:true, mode:"smtp"}`** (order + auth emails will actually send) |
+| Local hygiene | local `main` fast-forwarded to `c836372`; branch in sync; tree clean |
+
+Smoke-test procedure Steps A–B executed (read-only) — all pass. Step C (live order drill) remains owner-gated.
